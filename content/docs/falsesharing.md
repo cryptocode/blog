@@ -1,5 +1,5 @@
 ---
-title: "Ruining performance with false sharing in Zig"
+title: "Stuff about things"
 date: 2023-07-08T18:45:37+02:00
 summary: "Putting some more numbers on false sharing cost using Zig"
 ---
