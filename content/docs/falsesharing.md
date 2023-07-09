@@ -65,7 +65,7 @@ For regular structs, Zig is free to reorder the fields to _minimize padding_, wh
 However, by enforcing the specified order, the `padding` field fulfills its intended purpose: It places `head_index` and `tail_index` on separate cache lines.
 ### The code
 
-The benchmark is designed to demonstrate the issue at hand, and the results are not necessarily representative of false sharing slowdowns in a real-world application. That said, if false sharing occurs on the hot path, the impact can be significant.
+The benchmark is designed to demonstrate the issue at hand, and the results are not necessarily representative of false sharing slowdowns in a real-world application. That said, if false sharing occurs in a hot path, the impact can be significant.
 
 ```zig
 const std = @import("std");
@@ -112,7 +112,7 @@ Do the same without the `extern` keyword (rename the json output filename in the
 
 The following tables contain the benchmark summary, 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur. 
 
-While a larger number of samples were taken to verify the effect, the numbers below are representative.
+While a larger number of samples were taken to verify the effect, the numbers below are representative for the findings.
 
 Not only is the average time for the false sharing case significantly worse, the standard deviation is also an order of magnitude higher.
 
