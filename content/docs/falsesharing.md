@@ -31,9 +31,7 @@ A cache line is the smallest unit of transfer between each core's local Lx cache
 
 Cache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. The actual impact depends on a thread's affinity to core socket and hyperthreads, scheduling, and the number of threads.
 
-A cache line is typically 64 bytes, but this varies between CPU architectures.
-
-Tools such as `lstopo` are useful to determine the cache hierachy and line size on your CPU.
+A cache line is typically 64 bytes, but this varies between CPU architectures. Tools such as `lstopo` are useful to determine the cache hierachy and line size on your CPU.
 ### A little Zig surprise
 
 Take a look at this struct:
