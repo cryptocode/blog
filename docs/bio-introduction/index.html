@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Bio - All your parentheses are belong to us | cryptocode</title>
+<meta name="keywords" content="">
+<meta name="description" content="A little Lisp written in Zig">
+<meta name="author" content="">
+<link rel="canonical" href="https://cryptocode.github.io/blog/docs/bio-introduction/">
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.174413eb633337f9ef5559b1971a230b72b3f88ecd559baf9f55129e7ed6c011.css" integrity="sha256-F0QT62MzN/nvVVmxlxojC3Kz&#43;I7NVZuvn1USnn7WwBE=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://cryptocode.github.io/blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://cryptocode.github.io/blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Bio - All your parentheses are belong to us" />
+<meta property="og:description" content="A little Lisp written in Zig" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/bio-introduction/" /><meta property="article:section" content="docs" />
+<meta property="article:published_time" content="2021-04-25T10:00:00+02:00" />
+<meta property="article:modified_time" content="2021-04-25T10:00:00+02:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Bio - All your parentheses are belong to us"/>
+<meta name="twitter:description" content="A little Lisp written in Zig"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Docs",
+      "item": "https://cryptocode.github.io/blog/docs/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Bio - All your parentheses are belong to us",
+      "item": "https://cryptocode.github.io/blog/docs/bio-introduction/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Bio - All your parentheses are belong to us",
+  "name": "Bio - All your parentheses are belong to us",
+  "description": "A little Lisp written in Zig",
+  "keywords": [
+    
+  ],
+  "articleBody": " In the previous Zig post, we wrote a small postfix notation calculator.\nThis post takes a look at something that take prefix notation to the extreme: a new language in the Lisp family called Bio\nThe goal of this project is to make it easy to play around with Lisp dialect ideas and to make a well-documented and readable Lisp interpreter for others to learn from. This article aims to point out some key areas people stumble on when writing a basic Lisp interpreter.\nAcknowledgments: Bio is written in Zig, a fact I think awesome designer Joy Machs was able to neatly incorporate into the lambda/lisp oriented logo. I uncovered a stdlib bug while working on this; thanks to jumpnbrownweasel for fixing it quickly.\nThis initial iteration gives us a language with:\nHigher-order functions with lexical scoping and enough juice to implement recursion in the language itself The ability to create composite data types with polymorphic behavior. Macros Garbage collection and atom interning An error handling mechanism Tail call elimination A module system A language reference A small but extensible standard library written in Bio, with functions like filter, map, and quicksort A REPL and a couple of ways to load and evaluate source files Here’s a few sample Bio expressions:\n; Define a variable, note that (define) works as well (var x 5) ; Define a couple of functions (one using λ and π symbols) and call them (var square (lambda (x) (* x x))) (var circumference (λ (r) (* 2 π r))) (print \"square is:\" (square x) \", circumference is:\" (circumference x)) ; Define a macro. Arguments are not evaluated until needed by the macro expansion (var if-above-10 (macro (val then else) `(if (\u003e ,val 10) ,then ,else) )) ; Prints aye (if-above-10 12 (print 'aye) (print 'nay)) ; Filter out negative numbers from a sorted list =\u003e (1 2 5 40) (filter (quicksort '(5 40 1 -3 2) \u003c) (λ (x) (\u003e= x 0))) ; Double every element in a list =\u003e (2 4 6) (map (λ (x) (* 2 x)) '(1 2 3)) ; Summation through zipping lists =\u003e (2 6 11) (map + '(0 2 5) '(1 2 3) '(1 2 3)) ; Add ten to every item and print it ; Note that \"each\" is just a standard library function (var mylist '(1 2 3)) (each mylist (lambda (x) (print (+ x 10) \", \"))) ; Tail-call elimination makes it possible to make ; any loop construct you want. ; Here's the while loop from the standard library in action: (var c 0) (while (\u003c c 10) (print \"Value is now \" c \"\\n\") (inc! c) ) ; Read two numbers. If the second one is zero, this will ; fail with \"Division by zero\" (try (math.safe-div (io.read-number) (io.read-number)) (print \"The result is: \" #value) (print \"Failed: \" #!) ) ; Import a point module. By convention, module variables are Pascal cased. (var Point (import \"examples/mod-point.lisp\")) ; Make a position (a composite type), where ; new-point and new-location are just functions (var mypos (Point new-point 61.5 42.2)) (var new-york (Point new-location 40.7554351 -73.9981619)) ; Update using applicative syntax ((mypos update) 17.2 20.5) ; Update again, now using function call syntax but in a different environment (mypos (update 27.2 20.5)) ; Print the location by accessing the x and y variables of the position (print \"Moved to:\" (mypos x) (mypos y) \"\\n\") ; Print the location using the simple as-string version (print \"Located at\" ((mypos as-string)) \"\\n\") ; Print the location as longitude/latitude =\u003e \"40.7554351° N 73.9981619° W\" (print \"Located at\" ((new-york as-string)) \"\\n\") ; Introspection =\u003e \"number, #t, #t\" (print (string (typename math.pi) \", \" (symbol? 'a) \", \" (callable? +))) ; Let's implement factorial in the fanciest way imaginable with lots of ; lambda symbols and a fixpoint combinator. The standard library also ; contains a direct-recursive version. (var Z (λ (f) ((λ (g) (g g)) (λ (g) (f (λ (a) ((g g) a))))))) (var ! (Z (λ (r) (λ (x) (if (\u003c x 2) 1 (* x (r (- x 1)))))))) ; Does it work? (assert (= 120 (! 5))) Source code and the language reference is available here: https://github.com/cryptocode/bio\nBio is work in progress; the article-source release contains the version that existed at the time of writing this article.\nUsing Bio To build, clone the repository and run zig build\nYou can now use Bio in two ways:\nStart the REPL with ./bio Run a program with ./bio run myprogram.lisp There are some examples you play around with, like this one that prints a Sierpinksi triangle. You can change the size by editing the source file.\n./bio run examples/triangles.lisp ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ Here’s a persistent album database. It persists by saving Bio expressions to a file and then evaluating them on startup:\n./bio run examples/albums.lisp Welcome to the Bio Album Database 1: Add 2: Find by name 3: List all 4: Exit What kind of Lisp flavor is it? It’s a single namespace Lisp inspired by Scheme. Scheme, like Lisp itself, is a family of dialects, and Bio is yet another one. Some of the differences come from ideas I want to explore, such as the ability to treat environments as expressions, which is the building block for modules and composite data types.\nThe best way to learn Bio is to play around with it, type (env) in the REPL for a list of functions, and consult the language reference. There are also some example files in the repository.\nThe floor plan The Bio source code is broken into its main areas of concern, thus filenames should be self explanatory: gc.zig contains the garbage collector, ast.zig the expression AST, intrinsics.zig contains the intrinsics, etc.\nDealing with intrinsics A decent chunk of the code base is the implementation of intrinsic functions and symbols, such as stdList to implement (list 1 2 3) and #t for the truth symbol. All these functions are prefixed “std” and have the same signature:\nfn std\u003cintrinsic\u003e(ev: *Interpreter, env: *Env, args: []const *Expr) anyerror!*Expr This signature fits the ExprValue union type for intrinsic functions.\nThe reader and evaluator The Interpreter struct implements the logic to read and evaluate expressions. When initialized, a root environment is created and all the intrinsic symbols and functions are registered with it. This way, when your Bio program calls (list 1 2 3), the list function is readily available in the root environment.\nIn a Lisp interpreter, we want to move from the world of text to the world of s-expressions as quickly as possible.\nFirst order of business is to split expressions like (var x (* 2.45 scale)) into a stream of tokens like (, var, x, (, *, 2.45, scale, ), )\nIf we required the programmer to always put spaces around parentheses, we could use the std.mem.split function. But that wouldn’t be very friendly, so we’re going to extend the idea of the Spliterator into a token iterator for Lisp expressions. We can now easily iterate over tokens using it.next()\nThe read() function uses the Lisperator and produces exactly one expression: an atom or a list.\nOf course, a list can contain other lists and atoms, so read works recursively.\nAn atom is either a symbol or a number. Some symbols are predefined, like #t and #f for true and false. Symbols can also be strings, like \"This message\"\nThe whole REPL process goes like this:\nreadBalancedExpr, which reads a complete expression that may span multiple lines. parseAndEvalExpression is then called, which in turn calls parse and eval parse is a small helper to set up the Lisperator, and call read with it. The read function recursively parses the s-expression. eval recursively evaluates the expression and returns the result, which the REPL prints. Intrinsic functions Rather than implementing all basic Lisp functions in Zig, we’ll implement a handful of general functions from which a Bio standard library can be built. For example, all functions querying lists, such as car and cdr, are built from an intrinsic range function.\nThe standard library is located in std.lisp, which is loaded on startup. For example, here’s how car and cdr are defined in terms of range:\n(var car (λ (list) (range list 0 1))) (var cdr (λ (list) (range list 1))) Note that λ is a synonym for lambda - you can use either. The λ version is less verbose when passing function literals to functions like filter (many editors have plugins to automatically convert certain identifiers to symbols, like Symbol Complete for vscode)\nLogical and relational functions, or “I can do that already?” Everyone who implements a Lisp soon reaches this magical point where not only can you start implementing the language in itself, you start preferring it! This is not to say the host language is bad, it’s just that if you can extend your Lisp using Lisp, that makes everything easier. It enables you to experiment in the REPL, and you don’t have to worry about low-level details like memory management.\nAs an example, here’s how or, \u003c, and \u003c= are implemented in the standard library:\n(var or (lambda (x y) (if x #t (if y #t #f)) ) ) (var \u003c (lambda (x y) (if (= (order x y) (- 1)) #t #f))) (var \u003c= (lambda (x y) (if (or (\u003c x y) (= x y) ) #t #f))) So first we define or as a function, then we use it to implement \u003c using the order intrinsic, which finally allows us to implement \u003c=.\nFunctional composition is great!\nAlas, time for a reality check! Implementing or as a function is wrong here because both arguments are always evaluated. We’ll fix this as soon when we get to macros.\nScopes Early Lisp dialects had dynamic scoping, and this is still the default in Emacs Lisp.\nLike most languages these days, Bio is lexically scoped. What’s the difference anyway?\nFirst of all, if a variable is not bound to a formal argument or a local definition, it must be a free variable defined elsewhere. How exactly should Bio “look elsewhere”? This is where environments and their parents come in.\nEvery lambda executes in its own environment, containing arguments and local variables. An environment is just a hashmap from the symbol literal to the value.\n(var x 5) is essentially the addition of a hashmap entry in the current environment. The same is true when passing arguments.\nEvery environment, except the initial root environment, also has a parent environment.\nIf the parent environment is the callers’ environment, we have dynamic scoping If the parent environment is the environment that existed when the lambda was defined, we have lexical scoping The last point tells us exactly what we need to do in the implementation:\nWhen we define a lambda, store the current environment in the lambda expression so we can look it up when evaluating the lambda. When we evaluate the lambda, make a brand new environment, add arguments to that environment (using the formal parameter names as key), and then make the parent environment be whatever the current environment was when the lambda was defined. Macros “One can even conjecture that Lisp owes its survival specifically to the fact that its programs are lists, which everyone, including me, has regarded as a disadvantage.” – John McCarthy\nI mentioned earlier that we can’t implement or using a regular function, because all arguments are evaluated before the function is evaluated. Logical operators are supposed to use shortcut evaluation.\nImplementing or as a macro will fix the problem:\n(var or (macro (expr1 expr2) `(if ,expr1 #t (if ,expr2 #t #f) ) )) While the use and implementation of macros are similar to lambdas, there are some differences. These differences are key to unleashing the power of Lisp meta-programming:\nThe macro arguments are not evaluated when calling the macro. It’s up to the body to decide if and when to evaluate them. The parent environment is different. For lambdas, the parent environment is the environment that existed when it was defined. This gives us lexical scoping. But that’s not what we want for macros; we kind of want to “paste” the expanded body into the very place it’s being called. For this reason, the parent environment for a macro is simply the current one (it’s not quite “pasting” though, since the macro has its own local environment; this helps avoid symbol clashes.) The last expression of the macro body (the result of evaluating the macro) is evaluated again! The first evaluation typically causes a quasiquote to be expanded into code. The second evaluation then evaluates that code. Macros are Bio functions that write Bio code, enabling you to mutate the language to fit your needs. In Lisp, code is lists which we can manipulate with the full power of the language, where other languages usually have to degrade to something like building strings.\nQuasiquoting and unquoting The or macro above uses quasiquoting to help write code. It’s not strictly necessary, but it’s usually more readable than producing lists and quoting manually.\nQuasiquoting is like quoting, except that it allows select expressions to be unquoted. In terms of implementation, it’s important to note that unquote and unquote-splicing are always executed inside a quasiquote.\nExample:\n(var x 4) (var mylist '(1 2 3)) `(,@mylist ,x) (1 2 3 4) If you call (verbose), any quasiquote expansions will be printed.\nGarbage collection As part of devising Lisp, John McCarthy also described a clever method for automatic memory management: garbage collection. Lisp programmers detest manual memory management, so I guess we’ll have to implement it.\nTo prove that it works, the interpreter allocates from Zig’s GeneralPurposeAllocator with leak detection turned on.\nHere are the main steps:\nWhen we allocate an expression, we register it with the GC If we don’t register it with the GC, it’s a pinned expression, such as the predefined nil expression; this is static data we don’t need to deallocate. Every 100K allocation, we run the garbage collector, but it can also be run manually with (gc). This will first mark all reachable expressions. Then it runs through all registered expressions. If it’s not marked, we can deallocate it. By reachable, I mean that the expression is either a key or a value in some environment. If it’s a key, it’s always a symbol expression (denoting a variable name). We also need to sweep environments. The marking step starts at the root environment and calls markEnvironment on it. This will loop through all entries and mark the environment associated with the expression. For lambdas, this may be something different than the root environment, because another lambda may have returned it. We also mark any parents of reachable environments. Finally, we destroy any unmarked environments. There’s a lot of simple optimizations that can be done here, such as not using a container for marking, and only doing partial sweeps to reduce GC pauses.\nError handling Bio implements a simple error handling mechanism through the try and error functions.\n(try (math.safe-div (io.read-number) (io.read-number)) (print \"The doubled result is: \" (* 2 #value)) (print \"Failed: \" #!) The try function is very similar to if: the first branch is evaluated if the function succeeds, otherwise the second (optional) branch is evaluated. The #value symbol contains the result of the tried expression, while #! contains any error expressions. Error expressions are produced with the (error ) function.\nFor more information, see the Reference section on GitHub.\nTail call elimination Lisp programmers just love recursion. In fact, some of them love it so much that they make Lisp dialects without loop constructs! Bio macros such as while simply expand to a tail-recursive function, and these can fortunately be made efficient. While Bio offers a loop intrinsic, it isn’t strictly necessary.\nFor Bio to support recursion well, we have to implement tail call optimization, or TCO. Without it, the evaluator would keep calling itself through indirection recursion, blowing up the stack in a jiffy.\nThe solution is conceptually simple: the body of eval in Zig is a loop. When eval evaluates, say, if, then the selected branch will become the next expression to evaluate. In the case of lambdas, the last expression becomes the next expression in the eval loop, and in this case we also have to change the loop’s current environment to the lambda environment. The same is true for environment expressions, such as (pos (update 3 4))\nI think the easiest way to see how this works is to fire up zig run bio.zig in a debugger, then step through eval after pasting a minimal recursive Bio function in the REPL.\nVSCode configuration Install a Lisp syntax plugin Add a run task for the currently open lisp file in tasks.json: { \"label\": \"bio run\", \"type\": \"shell\", \"command\": \"${workspaceFolder}/bio run ${file}\", \"problemMatcher\": [], \"group\": { \"kind\": \"build\", \"isDefault\": true } }, Reading list http://jmc.stanford.edu/articles/lisp/lisp.pdf http://jmc.stanford.edu/articles/recursive/recursive.pdf A different take on implementing Lisp in Zig can be found in the Mal repository (not mine)* A comptime Lisp A correct quasiquoting algorithm in appendix A Going forward (feel free to contribute or fork the project) Add arbitrary precision number support, ideally a Scheme-like numerical tower system A more advanced macro system, including reader macros GC optimizations Expand the standard library Improve error handling by recording more context Integrate libffi or similar so std lib can do anything A compiler targeting a vm or maybe Zig stage2 ir ",
+  "wordCount" : "2983",
+  "inLanguage": "en",
+  "datePublished": "2021-04-25T10:00:00+02:00",
+  "dateModified": "2021-04-25T10:00:00+02:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://cryptocode.github.io/blog/docs/bio-introduction/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "cryptocode",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://cryptocode.github.io/blog/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="cryptocode (Alt + H)">cryptocode</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Bio - All your parentheses are belong to us
+    </h1>
+    <div class="post-description">
+      A little Lisp written in Zig
+    </div>
+    <div class="post-meta"><span title='2021-04-25 10:00:00 +0200 +0200'>April 25, 2021</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p><img loading="lazy" src="/blog/images/bio-header.png" alt="Header"  />
+</p>
+<p><a href="https://cryptocode.github.io/blog/docs/prefix-calculator/" title="previous Zig article">In the previous Zig post</a>, we wrote a small <em>postfix</em> notation calculator.</p>
+<p>This post takes a look at something that take <em>prefix</em> notation to the extreme: a new language in the Lisp family called <a href="https://github.com/cryptocode/bio">Bio</a></p>
+<p>The goal of this project is to make it easy to play around with Lisp dialect ideas and to make a well-documented and readable Lisp interpreter for others to learn from. This article aims to point out some key areas people stumble on when writing a basic Lisp interpreter.</p>
+<p><em>Acknowledgments: Bio is written in <a href="ziglang.org">Zig</a>, a fact I think awesome designer <a href="https://artstation.com/joymachs">Joy Machs</a> was able to neatly incorporate into the lambda/lisp oriented logo. I uncovered a <a href="https://github.com/ziglang/zig/issues/8454">stdlib bug</a> while working on this; thanks to <a href="https://github.com/jumpnbrownweasel">jumpnbrownweasel</a> for fixing it quickly.</em></p>
+<p>This initial iteration gives us a language with:</p>
+<ul>
+<li>Higher-order functions with lexical scoping and enough juice to implement recursion in the language itself</li>
+<li>The ability to create composite data types with polymorphic behavior.</li>
+<li>Macros</li>
+<li>Garbage collection and atom interning</li>
+<li>An error handling mechanism</li>
+<li>Tail call elimination</li>
+<li>A module system</li>
+<li>A language reference</li>
+<li>A small but extensible standard library written in Bio, with functions like filter, map, and quicksort</li>
+<li>A REPL and a couple of ways to load and evaluate source files</li>
+</ul>
+<p>Here&rsquo;s a few sample Bio expressions:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scheme" data-lang="scheme"><span style="display:flex;"><span><span style="color:#75715e">; Define a variable, note that (define) works as well</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> x <span style="color:#ae81ff">5</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Define a couple of functions (one using λ and π symbols) and call them</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> square (<span style="color:#66d9ef">lambda </span>(<span style="color:#a6e22e">x</span>) (* x x)))
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> circumference (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">r</span>) (* <span style="color:#ae81ff">2</span> <span style="color:#960050;background-color:#1e0010">π</span> r)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;square is:&#34;</span> (<span style="color:#a6e22e">square</span> x) <span style="color:#e6db74">&#34;, circumference is:&#34;</span> (<span style="color:#a6e22e">circumference</span> x))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Define a macro. Arguments are not evaluated until needed by the macro expansion</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> if-above-10 (<span style="color:#a6e22e">macro</span> (<span style="color:#a6e22e">val</span> then else)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">`</span>(<span style="color:#66d9ef">if </span>(&gt; <span style="color:#f92672">,</span>val <span style="color:#ae81ff">10</span>) <span style="color:#f92672">,</span>then <span style="color:#f92672">,</span>else)
+</span></span><span style="display:flex;"><span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Prints aye</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">if-above-10</span> <span style="color:#ae81ff">12</span> (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#39;aye</span>) (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#39;nay</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Filter out negative numbers from a sorted list =&gt; (1 2 5 40)</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">filter</span> 
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">quicksort</span> <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">5</span> <span style="color:#ae81ff">40</span> <span style="color:#ae81ff">1</span> <span style="color:#ae81ff">-3</span> <span style="color:#ae81ff">2</span>) &lt;) 
+</span></span><span style="display:flex;"><span>    (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">x</span>) (&gt;= x <span style="color:#ae81ff">0</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Double every element in a list =&gt; (2 4 6)</span>
+</span></span><span style="display:flex;"><span>(map (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">x</span>) (* <span style="color:#ae81ff">2</span> x)) <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Summation through zipping lists =&gt; (2 6 11)</span>
+</span></span><span style="display:flex;"><span>(map + <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">0</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">5</span>) <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Add ten to every item and print it</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Note that &#34;each&#34; is just a standard library function</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> mylist <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">each</span> mylist (<span style="color:#66d9ef">lambda </span>(<span style="color:#a6e22e">x</span>) 
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">print</span> (+ x <span style="color:#ae81ff">10</span>) <span style="color:#e6db74">&#34;, &#34;</span>)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Tail-call elimination makes it possible to make </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; any loop construct you want. </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Here&#39;s the while loop from the standard library in action:</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> c <span style="color:#ae81ff">0</span>)
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">while</span> (&lt; c <span style="color:#ae81ff">10</span>)
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;Value is now &#34;</span> c <span style="color:#e6db74">&#34;\n&#34;</span>)
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">inc!</span> c)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Read two numbers. If the second one is zero, this will</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; fail with &#34;Division by zero&#34;</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">try</span> (<span style="color:#a6e22e">math</span><span style="color:#f92672">.</span>safe-div (<span style="color:#a6e22e">io</span><span style="color:#f92672">.</span>read-number) (<span style="color:#a6e22e">io</span><span style="color:#f92672">.</span>read-number))
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;The result is: &#34;</span> <span style="color:#f92672">#</span>value)
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;Failed: &#34;</span> <span style="color:#f92672">#</span>!)
+</span></span><span style="display:flex;"><span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Import a point module. By convention, module variables are Pascal cased.</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> Point (<span style="color:#a6e22e">import</span> <span style="color:#e6db74">&#34;examples/mod-point.lisp&#34;</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Make a position (a composite type), where </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; new-point and new-location are just functions</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> mypos (<span style="color:#a6e22e">Point</span> new-point <span style="color:#ae81ff">61.5</span> <span style="color:#ae81ff">42.2</span>))
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> new-york (<span style="color:#a6e22e">Point</span> new-location <span style="color:#ae81ff">40.7554351</span> <span style="color:#ae81ff">-73.9981619</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Update using applicative syntax</span>
+</span></span><span style="display:flex;"><span>((<span style="color:#a6e22e">mypos</span> update) <span style="color:#ae81ff">17.2</span> <span style="color:#ae81ff">20.5</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Update again, now using function call syntax but in a different environment</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">mypos</span> (<span style="color:#a6e22e">update</span> <span style="color:#ae81ff">27.2</span> <span style="color:#ae81ff">20.5</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Print the location by accessing the x and y variables of the position</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;Moved to:&#34;</span> (<span style="color:#a6e22e">mypos</span> x) (<span style="color:#a6e22e">mypos</span> y) <span style="color:#e6db74">&#34;\n&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Print the location using the simple as-string version</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;Located at&#34;</span> ((<span style="color:#a6e22e">mypos</span> as-string)) <span style="color:#e6db74">&#34;\n&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Print the location as longitude/latitude =&gt; &#34;40.7554351° N  73.9981619° W&#34;</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;Located at&#34;</span> ((<span style="color:#a6e22e">new-york</span> as-string)) <span style="color:#e6db74">&#34;\n&#34;</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Introspection =&gt; &#34;number, #t, #t&#34;</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">print</span> (string (<span style="color:#a6e22e">typename</span> math<span style="color:#f92672">.</span>pi) <span style="color:#e6db74">&#34;, &#34;</span> (symbol? <span style="color:#e6db74">&#39;a</span>) <span style="color:#e6db74">&#34;, &#34;</span> (<span style="color:#a6e22e">callable?</span> +)))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Let&#39;s implement factorial in the fanciest way imaginable with lots of </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; lambda symbols and a fixpoint combinator. The standard library also </span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; contains a direct-recursive version.</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> Z (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">f</span>) ((<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">g</span>) (<span style="color:#a6e22e">g</span> g)) (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">g</span>) (<span style="color:#a6e22e">f</span> (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">a</span>) ((<span style="color:#a6e22e">g</span> g) a)))))))
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> ! (<span style="color:#a6e22e">Z</span> (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">r</span>) (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">x</span>) (<span style="color:#66d9ef">if </span>(&lt; x <span style="color:#ae81ff">2</span>) <span style="color:#ae81ff">1</span> (* x (<span style="color:#a6e22e">r</span> (- x <span style="color:#ae81ff">1</span>))))))))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">; Does it work?</span>
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">assert</span> (= <span style="color:#ae81ff">120</span> (<span style="color:#a6e22e">!</span> <span style="color:#ae81ff">5</span>)))
+</span></span></code></pre></div><p>Source code and the language reference is available here: <a href="https://github.com/cryptocode/bio">https://github.com/cryptocode/bio</a></p>
+<p>Bio is work in progress; the <a href="https://github.com/cryptocode/bio/releases/tag/0.1">article-source</a> release contains the version that existed at the time of writing this article.</p>
+<h2 id="using-bio">Using Bio<a hidden class="anchor" aria-hidden="true" href="#using-bio">#</a></h2>
+<p>To build, clone the repository and run <code>zig build</code></p>
+<p>You can now use Bio in two ways:</p>
+<ol>
+<li>Start the REPL with <code>./bio</code></li>
+<li>Run a program with <code>./bio run myprogram.lisp</code></li>
+</ol>
+<p>There are some examples you play around with, like this one that prints a Sierpinksi triangle. You can change the size by editing the source file.</p>
+<pre tabindex="0"><code>./bio run examples/triangles.lisp
+
+               ^
+              ^ ^
+             ^   ^
+            ^ ^ ^ ^
+           ^       ^
+          ^ ^     ^ ^
+         ^   ^   ^   ^
+        ^ ^ ^ ^ ^ ^ ^ ^
+       ^               ^
+      ^ ^             ^ ^
+     ^   ^           ^   ^
+    ^ ^ ^ ^         ^ ^ ^ ^
+   ^       ^       ^       ^
+  ^ ^     ^ ^     ^ ^     ^ ^
+ ^   ^   ^   ^   ^   ^   ^   ^
+^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^ ^
+</code></pre><p>Here&rsquo;s a persistent album database. It persists by saving Bio expressions to a file and then evaluating them on startup:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scheme" data-lang="scheme"><span style="display:flex;"><span><span style="color:#f92672">.</span>/bio run examples/albums<span style="color:#f92672">.</span>lisp
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>Welcome to the Bio Album Database
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">1</span>: Add    <span style="color:#ae81ff">2</span>: Find by name    <span style="color:#ae81ff">3</span>: List all    <span style="color:#ae81ff">4</span>: Exit
+</span></span></code></pre></div><h2 id="what-kind-of-lisp-flavor-is-it">What kind of Lisp flavor is it?<a hidden class="anchor" aria-hidden="true" href="#what-kind-of-lisp-flavor-is-it">#</a></h2>
+<p>It&rsquo;s a single namespace Lisp inspired by Scheme. Scheme, like Lisp itself, is a family of dialects, and Bio is yet another one. Some of the differences come from ideas I want to explore, such as the ability to treat environments as expressions, which is the building block for modules and composite data types.</p>
+<p>The best way to learn Bio is to play around with it, type (env) in the REPL for a list of functions, and consult the language reference. There are also some example files in the repository.</p>
+<h2 id="the-floor-plan">The floor plan<a hidden class="anchor" aria-hidden="true" href="#the-floor-plan">#</a></h2>
+<p>The Bio source code is broken into its main areas of concern, thus filenames should be self explanatory: gc.zig contains the garbage collector, ast.zig the expression AST, intrinsics.zig contains the intrinsics, etc.</p>
+<h3 id="dealing-with-intrinsics">Dealing with intrinsics<a hidden class="anchor" aria-hidden="true" href="#dealing-with-intrinsics">#</a></h3>
+<p>A decent chunk of the code base is the implementation of <em>intrinsic</em> functions and symbols, such as <code>stdList</code> to implement <code>(list 1 2 3)</code> and <code>#t</code> for the truth symbol. All these functions are prefixed &ldquo;std&rdquo; and have the same signature:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> std<span style="color:#f92672">&lt;</span>intrinsic<span style="color:#f92672">&gt;</span>(ev<span style="color:#f92672">:</span> <span style="color:#f92672">*</span>Interpreter, env<span style="color:#f92672">:</span> <span style="color:#f92672">*</span>Env, args<span style="color:#f92672">:</span> []<span style="color:#66d9ef">const</span> <span style="color:#f92672">*</span>Expr) <span style="color:#66d9ef">anyerror</span><span style="color:#f92672">!*</span>Expr
+</span></span></code></pre></div><p>This signature fits the <code>ExprValue</code> union type for intrinsic functions.</p>
+<h3 id="the-reader-and-evaluator">The reader and evaluator<a hidden class="anchor" aria-hidden="true" href="#the-reader-and-evaluator">#</a></h3>
+<p>The <code>Interpreter</code> struct implements the logic to read and evaluate expressions. When initialized, a root environment is created and all the intrinsic symbols and functions are registered with it. This way, when your Bio program calls <code>(list 1 2 3)</code>, the <code>list</code> function is readily available in the root environment.</p>
+<p>In a Lisp interpreter, we want to move from the world of text to the world of <em>s-expressions</em> as quickly as possible.</p>
+<p>First order of business is to split expressions like <code>(var x (* 2.45 scale))</code> into a stream of tokens like <code>(, var, x, (, *, 2.45, scale, ), )</code></p>
+<p>If we required the programmer to always put spaces around parentheses, we could use the <code>std.mem.split</code> function. But that wouldn&rsquo;t be very friendly, so we&rsquo;re going to extend the idea of the <em>Spliterator</em> into a token iterator for Lisp expressions. We can now easily iterate over tokens using <code>it.next()</code></p>
+<p>The <code>read()</code> function uses the Lisperator and produces exactly one expression: an <code>atom</code> or a <code>list</code>.</p>
+<p>Of course, a list can contain other lists and atoms, so <code>read</code> works recursively.</p>
+<p>An atom is either a <code>symbol</code> or a <code>number</code>. Some symbols are predefined, like <code>#t</code> and <code>#f</code> for true and false. Symbols can also be strings, like <code>&quot;This message&quot;</code></p>
+<p>The whole REPL process goes like this:</p>
+<ul>
+<li>readBalancedExpr, which reads a complete expression that may span multiple lines.</li>
+<li>parseAndEvalExpression is then called, which in turn calls <code>parse</code> and <code>eval</code>
+<ul>
+<li>parse is a small helper to set up the Lisperator, and call <code>read</code> with it. The <code>read</code> function recursively parses the s-expression.</li>
+<li>eval recursively evaluates the expression and returns the result, which the REPL prints.</li>
+</ul>
+</li>
+</ul>
+<h2 id="intrinsic-functions">Intrinsic functions<a hidden class="anchor" aria-hidden="true" href="#intrinsic-functions">#</a></h2>
+<p>Rather than implementing all basic Lisp functions in Zig, we&rsquo;ll implement a handful of general functions from which a Bio standard library can be built. For example, all functions querying lists, such as <code>car</code> and <code>cdr</code>, are built from an intrinsic <code>range</code> function.</p>
+<p>The standard library is located in <code>std.lisp</code>, which is loaded on startup. For example, here&rsquo;s how <code>car</code> and <code>cdr</code> are defined in terms of <code>range</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scheme" data-lang="scheme"><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> car (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">list</span>) (<span style="color:#a6e22e">range</span> list <span style="color:#ae81ff">0</span> <span style="color:#ae81ff">1</span>)))
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> cdr (<span style="color:#960050;background-color:#1e0010">λ</span> (<span style="color:#a6e22e">list</span>) (<span style="color:#a6e22e">range</span> list <span style="color:#ae81ff">1</span>)))
+</span></span></code></pre></div><p>Note that <code>λ</code> is a synonym for <code>lambda</code> - you can use either. The λ version is less verbose when passing function literals to functions like <code>filter</code> (many editors have plugins to  automatically convert certain identifiers to symbols, like Symbol Complete for vscode)</p>
+<h2 id="logical-and-relational-functions-or-i-can-do-that-already">Logical and relational functions, or &ldquo;I can do that already?&rdquo;<a hidden class="anchor" aria-hidden="true" href="#logical-and-relational-functions-or-i-can-do-that-already">#</a></h2>
+<p>Everyone who implements a Lisp soon reaches this magical point where not only <em>can</em> you start implementing the language in itself, you start preferring it! This is not to say the host language is bad, it&rsquo;s just that if you can extend your Lisp using Lisp, that makes everything easier. It enables you to experiment in the REPL, and you don&rsquo;t have to worry about low-level details like memory management.</p>
+<p>As an example, here&rsquo;s how <code>or</code>, <code>&lt;</code>, and <code>&lt;=</code> are implemented in the standard library:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-lisp" data-lang="lisp"><span style="display:flex;"><span>(var or (lambda (x y) (<span style="color:#66d9ef">if</span> x <span style="color:#960050;background-color:#1e0010">#</span><span style="color:#66d9ef">t</span> (<span style="color:#66d9ef">if</span> y <span style="color:#960050;background-color:#1e0010">#</span><span style="color:#66d9ef">t</span> <span style="color:#960050;background-color:#1e0010">#</span>f)) ) )
+</span></span><span style="display:flex;"><span>(var <span style="color:#a6e22e">&lt;</span> (lambda (x y) (<span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">=</span> (order x y) (<span style="color:#a6e22e">-</span> <span style="color:#ae81ff">1</span>)) <span style="color:#960050;background-color:#1e0010">#</span><span style="color:#66d9ef">t</span> <span style="color:#960050;background-color:#1e0010">#</span>f)))
+</span></span><span style="display:flex;"><span>(var <span style="color:#a6e22e">&lt;=</span> (lambda (x y) (<span style="color:#66d9ef">if</span> (or (<span style="color:#a6e22e">&lt;</span> x y) (<span style="color:#a6e22e">=</span> x y) ) <span style="color:#960050;background-color:#1e0010">#</span><span style="color:#66d9ef">t</span> <span style="color:#960050;background-color:#1e0010">#</span>f)))
+</span></span></code></pre></div><p>So first we define <code>or</code> as a function, then we use it to implement <code>&lt;</code> using the <code>order</code> intrinsic, which finally allows us to implement <code>&lt;=</code>.</p>
+<p>Functional composition is great!</p>
+<p><em>Alas, time for a reality check! Implementing <code>or</code> as a function is wrong here because both arguments are always evaluated. We&rsquo;ll fix this as soon when we get to macros.</em></p>
+<h2 id="scopes">Scopes<a hidden class="anchor" aria-hidden="true" href="#scopes">#</a></h2>
+<p>Early Lisp dialects had <em>dynamic scoping</em>, and this is still the default in Emacs Lisp.</p>
+<p>Like most languages these days, Bio is <em>lexically scoped</em>. What&rsquo;s the difference anyway?</p>
+<p>First of all, if a variable is not <strong>bound</strong> to a formal argument or a local definition, it must be a <strong>free</strong> variable defined elsewhere. How exactly should Bio &ldquo;look elsewhere&rdquo;? This is where environments and their parents come in.</p>
+<p>Every lambda executes in its own environment, containing arguments and local variables. An environment is just a hashmap from the symbol literal to the value.</p>
+<p><code>(var x 5)</code> is essentially the addition of a hashmap entry in the current environment. The same is true when passing arguments.</p>
+<p>Every environment, except the initial root environment, also has a <em>parent</em> environment.</p>
+<ul>
+<li>If the parent environment is the callers&rsquo; environment, we have <strong>dynamic scoping</strong></li>
+<li>If the parent environment is the environment that existed <em>when the lambda was defined</em>, we have <strong>lexical scoping</strong></li>
+</ul>
+<p>The last point tells us exactly what we need to do in the implementation:</p>
+<ul>
+<li>When we <strong>define</strong> a lambda, store the <strong>current</strong> environment in the lambda expression so we can look it up when evaluating the lambda.</li>
+<li>When we <strong>evaluate</strong> the lambda, make a brand new environment, add arguments to that environment (using the formal parameter names as key), and then make the parent environment be whatever the current environment was when the lambda was defined.</li>
+</ul>
+<h2 id="macros">Macros<a hidden class="anchor" aria-hidden="true" href="#macros">#</a></h2>
+<p><em>&ldquo;One can even conjecture that Lisp owes its survival specifically to the fact that its programs are lists, which everyone, including me, has regarded as a disadvantage.&rdquo;
+&ndash; John McCarthy</em></p>
+<p>I mentioned earlier that we can&rsquo;t implement <code>or</code> using a regular function, because all arguments are evaluated before the function is evaluated. Logical operators are supposed to use shortcut evaluation.</p>
+<p>Implementing <code>or</code> as a macro will fix the problem:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scheme" data-lang="scheme"><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> <span style="color:#66d9ef">or </span>(<span style="color:#a6e22e">macro</span> (<span style="color:#a6e22e">expr1</span> expr2)
+</span></span><span style="display:flex;"><span>    <span style="color:#f92672">`</span>(<span style="color:#66d9ef">if </span><span style="color:#f92672">,</span>expr1
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">#t</span>
+</span></span><span style="display:flex;"><span>        (<span style="color:#66d9ef">if </span><span style="color:#f92672">,</span>expr2 <span style="color:#66d9ef">#t</span> <span style="color:#66d9ef">#f</span>)
+</span></span><span style="display:flex;"><span>    )
+</span></span><span style="display:flex;"><span>))
+</span></span></code></pre></div><p>While the use and implementation of macros are similar to lambdas, there are some differences. These differences are key to unleashing the power of Lisp meta-programming:</p>
+<ul>
+<li>The macro arguments are not evaluated when calling the macro. It&rsquo;s up to the body to decide if and when to evaluate them.</li>
+<li>The parent environment is different. For lambdas, the parent environment is the environment that existed when it was defined. This gives us lexical scoping. But that&rsquo;s not what we want for macros; we kind of want to &ldquo;paste&rdquo; the expanded body into the very place it&rsquo;s being called. For this reason, the parent environment for a macro is simply the <em>current</em> one (it&rsquo;s not <em>quite</em> &ldquo;pasting&rdquo; though, since the macro has its own local environment; this helps avoid symbol clashes.)</li>
+<li>The last expression of the macro body (the result of evaluating the macro) is evaluated again! The first evaluation typically causes a quasiquote to be expanded into code. The second evaluation then evaluates that code.</li>
+</ul>
+<p>Macros are Bio functions that write Bio code, enabling you to mutate the language to fit your needs. In Lisp, code is lists which we can manipulate with the full power of the language, where other languages usually have to degrade to something like building strings.</p>
+<h3 id="quasiquoting-and-unquoting">Quasiquoting and unquoting<a hidden class="anchor" aria-hidden="true" href="#quasiquoting-and-unquoting">#</a></h3>
+<p>The <code>or</code> macro above uses quasiquoting to help write code. It&rsquo;s not strictly necessary, but it&rsquo;s usually more readable than producing lists and quoting manually.</p>
+<p>Quasiquoting is like quoting, except that it allows select expressions to be unquoted. In terms of implementation, it&rsquo;s important to note that <code>unquote</code> and <code>unquote-splicing</code> are always executed inside a <code>quasiquote</code>.</p>
+<p>Example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scheme" data-lang="scheme"><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> x <span style="color:#ae81ff">4</span>)
+</span></span><span style="display:flex;"><span>(<span style="color:#a6e22e">var</span> mylist <span style="color:#f92672">&#39;</span>(<span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">3</span>))
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#f92672">`</span>(<span style="color:#f92672">,@</span>mylist <span style="color:#f92672">,</span>x)
+</span></span><span style="display:flex;"><span>(<span style="color:#ae81ff">1</span> <span style="color:#ae81ff">2</span> <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>)
+</span></span></code></pre></div><p>If you call <code>(verbose)</code>, any quasiquote expansions will be printed.</p>
+<h2 id="garbage-collection">Garbage collection<a hidden class="anchor" aria-hidden="true" href="#garbage-collection">#</a></h2>
+<p>As part of devising Lisp, John McCarthy also described a clever method for automatic memory management: garbage collection. Lisp programmers detest manual memory management, so I guess we&rsquo;ll have to implement it.</p>
+<p>To prove that it works, the interpreter allocates from Zig&rsquo;s GeneralPurposeAllocator with leak detection turned on.</p>
+<p>Here are the main steps:</p>
+<ul>
+<li>When we allocate an expression, we register it with the GC</li>
+<li>If we don&rsquo;t register it with the GC, it&rsquo;s a <em>pinned</em> expression, such as the predefined <code>nil</code> expression; this is static data we don&rsquo;t need to deallocate.</li>
+<li>Every 100K allocation, we run the garbage collector, but it can also be run manually with <code>(gc)</code>. This will first mark all reachable expressions. Then it runs through all registered expressions. If it&rsquo;s not marked, we can deallocate it. By reachable, I mean that the expression is either a key or a value in some environment. If it&rsquo;s a key, it&rsquo;s always a symbol expression (denoting a variable name). We also need to sweep environments. The marking step starts at the root environment and calls <code>markEnvironment</code> on it. This will loop through all entries and mark the environment associated with the expression. For lambdas, this may be something different than the root environment, because another lambda may have returned it. We also mark any parents of reachable environments. Finally, we destroy any unmarked environments.</li>
+</ul>
+<p>There&rsquo;s a lot of simple optimizations that can be done here, such as not using a container for marking, and only doing partial sweeps to reduce GC pauses.</p>
+<h2 id="error-handling">Error handling<a hidden class="anchor" aria-hidden="true" href="#error-handling">#</a></h2>
+<p>Bio implements a simple error handling mechanism through the <code>try</code> and <code>error</code> functions.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-scheme" data-lang="scheme"><span style="display:flex;"><span>(<span style="color:#a6e22e">try</span> (<span style="color:#a6e22e">math</span><span style="color:#f92672">.</span>safe-div (<span style="color:#a6e22e">io</span><span style="color:#f92672">.</span>read-number) (<span style="color:#a6e22e">io</span><span style="color:#f92672">.</span>read-number))
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;The doubled result is: &#34;</span> (* <span style="color:#ae81ff">2</span> <span style="color:#f92672">#</span>value))
+</span></span><span style="display:flex;"><span>    (<span style="color:#a6e22e">print</span> <span style="color:#e6db74">&#34;Failed: &#34;</span> <span style="color:#f92672">#</span>!)
+</span></span></code></pre></div><p>The <code>try</code> function is very similar to <code>if</code>: the first branch is evaluated if the function succeeds, otherwise the second (optional) branch is evaluated. The <code>#value</code> symbol contains the result of the tried expression, while <code>#!</code> contains any error expressions. Error expressions are produced with the <code>(error &lt;expr&gt;)</code> function.</p>
+<p>For more information, see the Reference section on GitHub.</p>
+<h2 id="tail-call-elimination">Tail call elimination<a hidden class="anchor" aria-hidden="true" href="#tail-call-elimination">#</a></h2>
+<p>Lisp programmers just love recursion. In fact, some of them love it so much that they make Lisp dialects without loop constructs! Bio macros such as <code>while</code> simply expand to a tail-recursive function, and these can fortunately be made efficient. While Bio offers a loop intrinsic, it isn&rsquo;t strictly necessary.</p>
+<p>For Bio to support recursion well, we have to implement tail call optimization, or TCO. Without it, the evaluator would keep calling itself through indirection recursion, blowing up the stack in a jiffy.</p>
+<p>The solution is conceptually simple: the body of <code>eval</code> in Zig is a loop. When <code>eval</code> evaluates, say, <code>if</code>, then the selected branch will become the next expression to evaluate. In the case of lambdas, the last expression becomes the next expression in the eval loop, and in this case we also have to change the loop&rsquo;s current environment to the lambda environment. The same is true for environment expressions, such as <code>(pos (update 3 4))</code></p>
+<p>I think the easiest way to see how this works is to fire up <code>zig run bio.zig</code> in a debugger, then step through <code>eval</code> after pasting a minimal recursive Bio function in the REPL.</p>
+<h2 id="vscode-configuration">VSCode configuration<a hidden class="anchor" aria-hidden="true" href="#vscode-configuration">#</a></h2>
+<ul>
+<li>Install a Lisp syntax plugin</li>
+<li>Add a run task for the currently open lisp file in <code>tasks.json</code>:</li>
+</ul>
+<pre tabindex="0"><code>{
+    &#34;label&#34;: &#34;bio run&#34;,
+    &#34;type&#34;: &#34;shell&#34;,
+    &#34;command&#34;: &#34;${workspaceFolder}/bio run ${file}&#34;,
+    &#34;problemMatcher&#34;: [],
+    &#34;group&#34;: {
+        &#34;kind&#34;: &#34;build&#34;,
+        &#34;isDefault&#34;: true
+    }
+},
+</code></pre><h2 id="reading-list">Reading list<a hidden class="anchor" aria-hidden="true" href="#reading-list">#</a></h2>
+<ol>
+<li><a href="http://jmc.stanford.edu/articles/lisp/lisp.pdf">http://jmc.stanford.edu/articles/lisp/lisp.pdf</a></li>
+<li><a href="http://jmc.stanford.edu/articles/recursive/recursive.pdf">http://jmc.stanford.edu/articles/recursive/recursive.pdf</a></li>
+<li>A different take on implementing Lisp in Zig can be found in the <a href="https://github.com/kanaka/mal/tree/master/impls/zig">Mal repository</a> (not mine)*</li>
+<li>A <a href="https://github.com/igmanthony/zig_comptime_lisp/">comptime Lisp</a></li>
+<li>A correct <a href="https://3e8.org/pub/scheme/doc/Quasiquotation%20in%20Lisp%20(Bawden).pdf">quasiquoting algorithm</a> in appendix A</li>
+</ol>
+<h2 id="going-forward-feel-free-to-contribute-or-fork-the-project">Going forward (feel free to contribute or fork the project)<a hidden class="anchor" aria-hidden="true" href="#going-forward-feel-free-to-contribute-or-fork-the-project">#</a></h2>
+<ul>
+<li>Add arbitrary precision number support, ideally a Scheme-like numerical tower system</li>
+<li>A more advanced macro system, including reader macros</li>
+<li>GC optimizations</li>
+<li>Expand the standard library</li>
+<li>Improve error handling by recording more context</li>
+<li>Integrate libffi or similar so std lib can do anything</li>
+<li>A compiler targeting a vm or maybe Zig stage2 ir</li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+     </body>
+
+</html>

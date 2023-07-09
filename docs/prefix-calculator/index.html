@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>A surprisingly capable RPN calculator in about 100 lines of Zig code | cryptocode</title>
+<meta name="keywords" content="">
+<meta name="description" content="Summary:
+Reverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let&rsquo;s see if 2 &#43; 2 is still 4:
+2 2 &#43; M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:
+First we input the known values so these get memory slots we can reference, rather than repeating the constants.">
+<meta name="author" content="">
+<link rel="canonical" href="https://cryptocode.github.io/blog/docs/prefix-calculator/">
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.174413eb633337f9ef5559b1971a230b72b3f88ecd559baf9f55129e7ed6c011.css" integrity="sha256-F0QT62MzN/nvVVmxlxojC3Kz&#43;I7NVZuvn1USnn7WwBE=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://cryptocode.github.io/blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://cryptocode.github.io/blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="A surprisingly capable RPN calculator in about 100 lines of Zig code" />
+<meta property="og:description" content="Summary:
+Reverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let&rsquo;s see if 2 &#43; 2 is still 4:
+2 2 &#43; M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:
+First we input the known values so these get memory slots we can reference, rather than repeating the constants." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/prefix-calculator/" /><meta property="article:section" content="docs" />
+<meta property="article:published_time" content="2021-03-01T10:00:00+02:00" />
+<meta property="article:modified_time" content="2021-03-01T10:00:00+02:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="A surprisingly capable RPN calculator in about 100 lines of Zig code"/>
+<meta name="twitter:description" content="Summary:
+Reverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let&rsquo;s see if 2 &#43; 2 is still 4:
+2 2 &#43; M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:
+First we input the known values so these get memory slots we can reference, rather than repeating the constants."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Docs",
+      "item": "https://cryptocode.github.io/blog/docs/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "A surprisingly capable RPN calculator in about 100 lines of Zig code",
+      "item": "https://cryptocode.github.io/blog/docs/prefix-calculator/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A surprisingly capable RPN calculator in about 100 lines of Zig code",
+  "name": "A surprisingly capable RPN calculator in about 100 lines of Zig code",
+  "description": "Summary:\nReverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let\u0026rsquo;s see if 2 + 2 is still 4:\n2 2 + M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:\nFirst we input the known values so these get memory slots we can reference, rather than repeating the constants.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Summary:\nReverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let’s see if 2 + 2 is still 4:\n2 2 + M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:\nFirst we input the known values so these get memory slots we can reference, rather than repeating the constants. In the quadratic formula, we thus use M0, M1 and M2 instead of a, b and c.\n$zig run rpn.zig # You can place comments using the hash sign. # Let's solve the quadratic equation where a=5, b=6, c=1 5 M0 = 5 6 M1 = 6 1 M2 = 1 # First solution M1 1 ~ * M1 2 ^ 4 M0 * M2 * - √ + 2 M0 * / M3 = -0.2 # Second solution M1 1 ~ * M1 2 ^ 4 M0 * M2 * - √ - 2 M0 * / M4 = -1 There we have it, the solutions are x = -0.2 and x = -1\nWhy RPN anyway? There’s less to type (because you don’t need parentheses), and some fans claim it leads to fewer mistakes. For this demo, though, the main reason is that implementing an RPN calculator is really simple. You don’t need any parsing beyond trivial tokenizing/converting to numbers, and operator precedence is a non-issue.\nLet’s do one more example, calculating the volume of a sphere. We first put the radius in a memory slot, then we evaluate the formula:\n4.8 M0 = 4.8 4 3 / 𝜋 * M0 3 ^ * M1 = 463.2466863277365 Here’s a nice little tool if you need help converting from infix to RPN.\nSupported operators and functions This is what’s implemented so far. Adding support for more functions and operators is easy - just update the switch statement in the tokenizer loop.\nOp Description * / + - % Basic arithmetic/modulus ^ Exponentiation ~ Negation M… Memory reference, such as M0 sin, cos, tan Trigonometric functions sqrt or √ Square root pi or 𝜋 Push 𝜋 to the stack e Push Euler’s number to the stack avg Pop all numbers from the stack, push the average In addition, you can type mc to clear the memory slots and exit to terminate the calculator.\nThere are 256 slots available, which wraps around if you evaluate more expressions in a session.\nHow does it work? The program sets up a read-eval-print loop (REPL) where it reads expressions, line by line, from standard input.\nEach line is then split on space. Each resulting token is then checked in a switch statement:\nIf it’s a number, push it to the evaluation stack. If it’s a unary operator/function, then the top of the stack is replaced by the value after applying the operator. If it’s a binary operator like multiplication, then two numbers are popped off the stack and replaced by the result. If it’s a memory reference, the corresponding value is pushed to the stack If it’s an empty line or a comment, read the next line. The final result is then stored in the next available memory slot and printed.\nThe code const std = @import(\"std\"); pub fn main() !void { const stdin = std.io.getStdIn().reader(); const stdout = std.io.getStdOut().writer(); try stdout.print(\"Zig RPN Calculator\\nType mc to clear memory slots, exit to quit.\\n\", .{}); var repl: [1024]u8 = undefined; var memslot = [_]f64{0} ** 256; var memslot_index: usize = 0; repl_loop: while (true) { const line = try stdin.readUntilDelimiterOrEof(\u0026repl, '\\n'); var input = std.mem.trimRight(u8, line.?, \"\\r\\n\"); if (std.mem.eql(u8, input, \"\")) { continue; } else if (std.mem.eql(u8, input, \"exit\")) { return; } else if (std.mem.eql(u8, input, \"mc\")) { memslot_index = 0; continue; } var it = std.mem.split(input, \" \"); var stack = [_]f64{0} ** 256; var sp: usize = 0; while (it.next()) |tok| { if (tok.len == 0) { continue :repl_loop; } switch (tok[0]) { '*' =\u003e {stack[sp-2] = stack[sp-2] * stack[sp-1]; sp -= 1;}, '/' =\u003e {stack[sp-2] = stack[sp-2] / stack[sp-1]; sp -= 1;}, '+' =\u003e {stack[sp-2] = stack[sp-2] + stack[sp-1]; sp -= 1;}, '-' =\u003e {stack[sp-2] = stack[sp-2] - stack[sp-1]; sp -= 1;}, '^' =\u003e {stack[sp-2] = std.math.pow(f64, stack[sp-2], stack[sp-1]); sp -= 1;}, '%' =\u003e {stack[sp-2] = try std.math.mod(f64, stack[sp-2], stack[sp-1]); sp -= 1;}, '~' =\u003e {stack[sp-1] = -stack[sp-1];}, '#' =\u003e continue :repl_loop, 'M' =\u003e { const index = std.fmt.parseInt(usize, tok[1..], 10) catch |err| { std.debug.print(\"Invalid memory memory slot index in {s}\\n\", .{tok}); continue :repl_loop; }; stack[sp] = memslot[index % 256]; sp += 1; }, '0'...'9', '.' =\u003e { const num = std.fmt.parseFloat(f64, tok) catch |err| { std.debug.print(\"Invalid character in floating point number {s}\\n\", .{tok}); continue :repl_loop; }; stack[sp] = num; sp += 1; }, else =\u003e { if (std.mem.eql(u8, tok, \"sin\")) { stack[sp-1] = std.math.sin(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"cos\")) { stack[sp-1] = std.math.cos(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"tan\")) { stack[sp-1] = std.math.tan(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"sqrt\") or std.mem.eql(u8, tok, \"√\")) { stack[sp-1] = std.math.sqrt(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"pi\") or std.mem.eql(u8, tok, \"𝜋\")) { stack[sp] = std.math.pi; sp += 1; } else if (std.mem.eql(u8, tok, \"e\")) { stack[sp] = std.math.e; sp += 1; } else if (std.mem.eql(u8, tok, \"avg\")) { const count = sp; var sum: f64 = 0; for (stack) |val| { sum += val; } sp-=count; stack[sp] = sum / @intToFloat(f64, count); sp+=1; } else { try stdout.print(\"Invalid operation {s}\\n\", .{tok}); continue :repl_loop; } }, } } memslot[memslot_index % 256] = stack[sp-1]; try stdout.print(\"M{d} = {d}\\n\", .{memslot_index % 256, stack[sp-1]}); memslot_index += 1; } } ",
+  "wordCount" : "942",
+  "inLanguage": "en",
+  "datePublished": "2021-03-01T10:00:00+02:00",
+  "dateModified": "2021-03-01T10:00:00+02:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://cryptocode.github.io/blog/docs/prefix-calculator/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "cryptocode",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://cryptocode.github.io/blog/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="cryptocode (Alt + H)">cryptocode</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      A surprisingly capable RPN calculator in about 100 lines of Zig code
+    </h1>
+    <div class="post-meta"><span title='2021-03-01 10:00:00 +0200 +0200'>March 1, 2021</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>Summary:</p>
+<ol>
+<li><a href="https://en.wikipedia.org/wiki/Reverse_Polish_notation">Reverse polish notation</a> is awesome</li>
+<li><a href="https://ziglang.org">Zig</a> is awesome</li>
+</ol>
+<p>Before solving quadratic equations and diving into code, let&rsquo;s see if 2 + 2 is still 4:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#ae81ff">2</span> <span style="color:#ae81ff">2</span> +
+</span></span><span style="display:flex;"><span>M0 <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>
+</span></span></code></pre></div><p>Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:</p>
+<p>First we input the known values so these get memory slots we can reference, rather than repeating the constants. In the quadratic formula, we thus use M0, M1 and M2 instead of a, b and c.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>$zig run rpn.zig
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># You can place comments using the hash sign.</span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Let&#39;s solve the quadratic equation where a=5, b=6, c=1 </span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span>M0 <span style="color:#f92672">=</span> <span style="color:#ae81ff">5</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span>M1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">6</span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>M2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># First solution</span>
+</span></span><span style="display:flex;"><span>M1 <span style="color:#ae81ff">1</span> ~ * M1 <span style="color:#ae81ff">2</span> ^ <span style="color:#ae81ff">4</span> M0 * M2 * - √ + <span style="color:#ae81ff">2</span> M0 * /
+</span></span><span style="display:flex;"><span>M3 <span style="color:#f92672">=</span> -0.2
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e"># Second solution</span>
+</span></span><span style="display:flex;"><span>M1 <span style="color:#ae81ff">1</span> ~ * M1 <span style="color:#ae81ff">2</span> ^ <span style="color:#ae81ff">4</span> M0 * M2 * - √ - <span style="color:#ae81ff">2</span> M0 * /
+</span></span><span style="display:flex;"><span>M4 <span style="color:#f92672">=</span> -1
+</span></span></code></pre></div><p>There we have it, the solutions are <code>x = -0.2</code> and <code>x = -1</code></p>
+<p><em>Why RPN anyway? There&rsquo;s less to type (because you don&rsquo;t need parentheses), and some fans claim it leads to fewer mistakes. For this demo, though, the main reason is that implementing an RPN calculator is really simple. You don&rsquo;t need any parsing beyond trivial tokenizing/converting to numbers, and operator precedence is a non-issue.</em></p>
+<p>Let&rsquo;s do one more example, calculating the volume of a sphere. We first put the radius in a memory slot, then we evaluate the formula:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>4.8
+</span></span><span style="display:flex;"><span>M0 <span style="color:#f92672">=</span> 4.8
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#ae81ff">4</span> <span style="color:#ae81ff">3</span> / 𝜋 * M0 <span style="color:#ae81ff">3</span> ^ *
+</span></span><span style="display:flex;"><span>M1 <span style="color:#f92672">=</span> 463.2466863277365
+</span></span></code></pre></div><p><a href="https://www.mathblog.dk/tools/infix-postfix-converter/">Here&rsquo;s a nice little tool</a> if you need help converting from infix to RPN.</p>
+<h1 id="supported-operators-and-functions">Supported operators and functions<a hidden class="anchor" aria-hidden="true" href="#supported-operators-and-functions">#</a></h1>
+<p>This is what&rsquo;s implemented so far. Adding support for more functions and operators is easy - just update the switch statement in the tokenizer loop.</p>
+<table>
+<thead>
+<tr>
+<th>Op</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>* / + - %</td>
+<td>Basic arithmetic/modulus</td>
+</tr>
+<tr>
+<td>^</td>
+<td>Exponentiation</td>
+</tr>
+<tr>
+<td>~</td>
+<td>Negation</td>
+</tr>
+<tr>
+<td>M&hellip;</td>
+<td>Memory reference, such as M0</td>
+</tr>
+<tr>
+<td>sin, cos, tan</td>
+<td>Trigonometric functions</td>
+</tr>
+<tr>
+<td>sqrt or √</td>
+<td>Square root</td>
+</tr>
+<tr>
+<td>pi or 𝜋</td>
+<td>Push 𝜋 to the stack</td>
+</tr>
+<tr>
+<td>e</td>
+<td>Push Euler&rsquo;s number to the stack</td>
+</tr>
+<tr>
+<td>avg</td>
+<td>Pop all numbers from the stack, push the average</td>
+</tr>
+</tbody>
+</table>
+<p>In addition, you can type <code>mc</code> to clear the memory slots and <code>exit</code> to terminate the calculator.</p>
+<p>There are 256 slots available, which wraps around if you evaluate more expressions in a session.</p>
+<h1 id="how-does-it-work">How does it work?<a hidden class="anchor" aria-hidden="true" href="#how-does-it-work">#</a></h1>
+<p>The program sets up a read-eval-print loop (REPL) where it reads expressions, line by line, from standard input.</p>
+<p>Each line is then split on space. Each resulting token is then checked in a switch statement:</p>
+<ul>
+<li>If it&rsquo;s a number, push it to the evaluation stack.</li>
+<li>If it&rsquo;s a unary operator/function, then the top of the stack is replaced by the value after applying the operator.</li>
+<li>If it&rsquo;s a binary operator like multiplication, then two numbers are popped off the stack and replaced by the result.</li>
+<li>If it&rsquo;s a memory reference, the corresponding value is pushed to the stack</li>
+<li>If it&rsquo;s an empty line or a comment, read the next line.</li>
+</ul>
+<p>The final result is then stored in the next available memory slot and printed.</p>
+<h1 id="the-code">The code<a hidden class="anchor" aria-hidden="true" href="#the-code">#</a></h1>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> std <span style="color:#f92672">=</span> @import(<span style="color:#e6db74">&#34;std&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> main() <span style="color:#f92672">!</span><span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> stdin <span style="color:#f92672">=</span> std.io.getStdIn().reader();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> stdout <span style="color:#f92672">=</span> std.io.getStdOut().writer();
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">try</span> stdout.print(<span style="color:#e6db74">&#34;Zig RPN Calculator</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">Type mc to clear memory slots, exit to quit.</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, .{});
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> repl<span style="color:#f92672">:</span> [<span style="color:#ae81ff">1024</span>]<span style="color:#66d9ef">u8</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> memslot <span style="color:#f92672">=</span> [_]<span style="color:#66d9ef">f64</span>{<span style="color:#ae81ff">0</span>} <span style="color:#f92672">**</span> <span style="color:#ae81ff">256</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> memslot_index<span style="color:#f92672">:</span> <span style="color:#66d9ef">usize</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    repl_loop<span style="color:#f92672">:</span> <span style="color:#66d9ef">while</span> (<span style="color:#66d9ef">true</span>) {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">const</span> line <span style="color:#f92672">=</span> <span style="color:#66d9ef">try</span> stdin.readUntilDelimiterOrEof(<span style="color:#f92672">&amp;</span>repl, <span style="color:#ae81ff">&#39;\n&#39;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> input <span style="color:#f92672">=</span> std.mem.trimRight(<span style="color:#66d9ef">u8</span>, line.<span style="color:#f92672">?</span>, <span style="color:#e6db74">&#34;</span><span style="color:#ae81ff">\r\n</span><span style="color:#e6db74">&#34;</span>);
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, input, <span style="color:#e6db74">&#34;&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, input, <span style="color:#e6db74">&#34;exit&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, input, <span style="color:#e6db74">&#34;mc&#34;</span>)) {
+</span></span><span style="display:flex;"><span>            memslot_index <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">continue</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> it <span style="color:#f92672">=</span> std.mem.split(input, <span style="color:#e6db74">&#34; &#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> stack <span style="color:#f92672">=</span> [_]<span style="color:#66d9ef">f64</span>{<span style="color:#ae81ff">0</span>} <span style="color:#f92672">**</span> <span style="color:#ae81ff">256</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> sp<span style="color:#f92672">:</span> <span style="color:#66d9ef">usize</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">while</span> (it.next()) <span style="color:#f92672">|</span>tok<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">if</span> (tok.len <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">continue</span> <span style="color:#f92672">:</span>repl_loop;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">switch</span> (tok[<span style="color:#ae81ff">0</span>]) {
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;*&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">*</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]; sp <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>;},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">/</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]; sp <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>;},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;+&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">+</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]; sp <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>;},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;-&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">-</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]; sp <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>;},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;^&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> std.math.pow(<span style="color:#66d9ef">f64</span>, stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>], stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]); sp <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>;},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;%&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#66d9ef">try</span> std.math.mod(<span style="color:#66d9ef">f64</span>, stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">2</span>], stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]); sp <span style="color:#f92672">-=</span> <span style="color:#ae81ff">1</span>;},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;~&#39;</span> <span style="color:#f92672">=&gt;</span> {stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>];},
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;#&#39;</span> <span style="color:#f92672">=&gt;</span> <span style="color:#66d9ef">continue</span> <span style="color:#f92672">:</span>repl_loop,
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;M&#39;</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">const</span> index <span style="color:#f92672">=</span> std.fmt.parseInt(<span style="color:#66d9ef">usize</span>, tok[<span style="color:#ae81ff">1</span>..], <span style="color:#ae81ff">10</span>) <span style="color:#66d9ef">catch</span> <span style="color:#f92672">|</span>err<span style="color:#f92672">|</span> { 
+</span></span><span style="display:flex;"><span>                        std.debug.print(<span style="color:#e6db74">&#34;Invalid memory memory slot index in {s}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, .{tok}); <span style="color:#66d9ef">continue</span> <span style="color:#f92672">:</span>repl_loop;
+</span></span><span style="display:flex;"><span>                    };
+</span></span><span style="display:flex;"><span>                    stack[sp] <span style="color:#f92672">=</span> memslot[index <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>];
+</span></span><span style="display:flex;"><span>                    sp <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                <span style="color:#e6db74">&#39;0&#39;</span>...<span style="color:#e6db74">&#39;9&#39;</span>, <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">const</span> num <span style="color:#f92672">=</span> std.fmt.parseFloat(<span style="color:#66d9ef">f64</span>, tok) <span style="color:#66d9ef">catch</span> <span style="color:#f92672">|</span>err<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>                        std.debug.print(<span style="color:#e6db74">&#34;Invalid character in floating point number {s}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, .{tok}); <span style="color:#66d9ef">continue</span> <span style="color:#f92672">:</span>repl_loop;
+</span></span><span style="display:flex;"><span>                    };
+</span></span><span style="display:flex;"><span>                    stack[sp] <span style="color:#f92672">=</span> num;
+</span></span><span style="display:flex;"><span>                    sp <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">else</span> <span style="color:#f92672">=&gt;</span> {
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;sin&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> std.math.sin(stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;cos&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> std.math.cos(stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;tan&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> std.math.tan(stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]);
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;sqrt&#34;</span>) <span style="color:#66d9ef">or</span> std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;√&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> std.math.sqrt(stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]);                                      
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;pi&#34;</span>) <span style="color:#66d9ef">or</span> std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;𝜋&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        stack[sp] <span style="color:#f92672">=</span> std.math.pi;
+</span></span><span style="display:flex;"><span>                        sp <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;e&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        stack[sp] <span style="color:#f92672">=</span> std.math.e;
+</span></span><span style="display:flex;"><span>                        sp <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>                    }                                                    
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> <span style="color:#66d9ef">if</span> (std.mem.eql(<span style="color:#66d9ef">u8</span>, tok, <span style="color:#e6db74">&#34;avg&#34;</span>)) {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">const</span> count <span style="color:#f92672">=</span> sp;
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">var</span> sum<span style="color:#f92672">:</span> <span style="color:#66d9ef">f64</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">for</span> (stack) <span style="color:#f92672">|</span>val<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>                            sum <span style="color:#f92672">+=</span> val;
+</span></span><span style="display:flex;"><span>                        }
+</span></span><span style="display:flex;"><span>                        sp<span style="color:#f92672">-=</span>count;
+</span></span><span style="display:flex;"><span>                        stack[sp] <span style="color:#f92672">=</span> sum <span style="color:#f92672">/</span> @intToFloat(<span style="color:#66d9ef">f64</span>, count);
+</span></span><span style="display:flex;"><span>                        sp<span style="color:#f92672">+=</span><span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                    <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">try</span> stdout.print(<span style="color:#e6db74">&#34;Invalid operation {s}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, .{tok});                        
+</span></span><span style="display:flex;"><span>                        <span style="color:#66d9ef">continue</span> <span style="color:#f92672">:</span>repl_loop;
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                },
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        memslot[memslot_index <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>] <span style="color:#f92672">=</span> stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>];
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">try</span> stdout.print(<span style="color:#e6db74">&#34;M{d} = {d}</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>, .{memslot_index <span style="color:#f92672">%</span> <span style="color:#ae81ff">256</span>, stack[sp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>]});
+</span></span><span style="display:flex;"><span>        memslot_index <span style="color:#f92672">+=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+     </body>
+
+</html>
