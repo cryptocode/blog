@@ -13,7 +13,7 @@
       <pubDate>Sat, 08 Jul 2023 18:45:37 +0200</pubDate>
       
       <guid>https://cryptocode.github.io/blog/docs/falsesharing/</guid>
-      <description>&lt;p&gt;Why would adding a single keyword to a struct in Zig give a 30% performance increase, with far less variability? As it turns out, tightly packed data structures and field reorderings can cause surprising performance issues in multithreaded programs due to &lt;em&gt;false sharing&lt;/em&gt;. Let&amp;rsquo;s look at the numbers.&lt;/p&gt;</description>
+      <description>&lt;p&gt;How come adding a single keyword to a struct in Zig give a 56% performance increase, with far less variability? As it turns out, densely packed data structures and field reorderings can cause significant performance issues in multithreaded programs due to &lt;em&gt;false sharing&lt;/em&gt;.&lt;/p&gt;</description>
     </item>
     
   </channel>
