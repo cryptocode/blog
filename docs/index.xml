@@ -13,7 +13,7 @@
       <pubDate>Sun, 09 Jul 2023 10:45:37 +0200</pubDate>
       
       <guid>https://cryptocode.github.io/blog/docs/falsesharing/</guid>
-      <description>&lt;p&gt;How come making a struct in Zig less densely packed can give a 56% performance increase, with far less variability? This post takes a look at &lt;em&gt;false sharing&lt;/em&gt; and how it can be caused by packed data layouts and unintended field reorderings.&lt;/p&gt;</description>
+      <description>&lt;p&gt;How come making a struct in Zig &lt;em&gt;less&lt;/em&gt; densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.&lt;/p&gt;</description>
     </item>
     
   </channel>
