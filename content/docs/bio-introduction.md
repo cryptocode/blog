@@ -6,7 +6,7 @@ date: 2021-04-25T10:00:00+02:00
 
 ![Header](/blog/images/bio-header.png)
 
-[In the previous Zig post]({{< ref "/prefix-calculator" >}} "previous Zig article"), we wrote a small *postfix* notation calculator.
+[In a previous Zig post]({{< ref "/prefix-calculator" >}} "previous Zig article"), we wrote a small *postfix* notation calculator.
 
 This post takes a look at something that take *prefix* notation to the extreme: a new language in the Lisp family called [Bio](https://github.com/cryptocode/bio)
 
