@@ -8,15 +8,17 @@ How come making a struct in Zig _less_ densely packed can give a 56% performance
 While packing data closely together can be very beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.
 
 ### Cache lines
-False sharing occurs when the data layout is at odds with the memory access pattern, namely multiple threads managing separate data that happens to fall on the same _cache line_.
+False sharing occurs when the data layout is at odds with the memory access pattern, namely threads updating thread-specific data that happens to fall on the same _cache line_.
 
 Imagine we're writing a multi-threaded queue. To avoid false sharing, we must to go from this situation:
 
 ![Cachelines](/blog/images/false-sharing-bad.png)
 
-To this:
+To something like this:
 
 ![Cachelines](/blog/images/false-sharing-good.png)
+
+**Thread 1 only cares about `head_index`, while thread 2 only cares about `tail_index`. By padding the struct, we ensure that each thread has its own cache line and can thus update its field without invalidating the other thread's cache line.**
 
 A cache line is the smallest unit of transfer between each core's local Lx caches and shared main memory, and thus also the unit of synchronization of coherence protocols such as MESI. Updating a cache line on one core will invalidate the corresponding line on all other cores' local caches.
 
@@ -24,7 +26,7 @@ Cache line invalidation is very expensive, and may additionally cause issues for
 
 A cache line is typically 64 bytes, but this varies between CPU architectures.
 
-Tools such as `lstopo` is useful to determine the cache hierachy and line size on your CPU.
+Tools such as `lstopo` are useful to determine the cache hierachy and line size on your CPU.
 ### A little Zig surprise
 
 Take a look at this struct:
@@ -55,12 +57,10 @@ _Note that we can not use a_ `packed struct` _in this example as the padding typ
 
 For regular structs, Zig is free to reorder the fields to _minimize padding_, which is a good thing in general.
 
-However, by enforcing the ordering, the intended reason for padding causes `head_index` and `tail_index` to fall on different cache lines, and thus false sharing is avoided: The two threads can update their respective fields without invalidating each other's cache lines.
+However, by enforcing the specified order, the `padding` field fulfills its intended purpose: It places `head_index` and `tail_index` on separate cache lines.
 ### The code
 
-The benchmark below demonstrates the issue.
-
-A benchmark is designed to demonstrate a certain aspect, and the results are not necessarily representative of a real-world application. That said, if false sharing occurs on the hot path of an application, the performance impact can be significant.
+The benchmark is designed to demonstrate the issue at hand, and the results are not necessarily representative of false sharing slowdowns in a real-world application. That said, if false sharing occurs on the hot path, the impact can be significant.
 
 ```zig
 const std = @import("std");
@@ -138,7 +138,7 @@ The actual runs:
 
 ### Hyperthreading adds a twist
 
-The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run tiems are still consistently much worse than the no false sharing case.
+The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run times are still consistently much worse than the no false sharing case.
 
 On Linux, you might want to consider using `pthread_setaffinity_np` to pin threads to physical cores.
 
@@ -155,7 +155,7 @@ Resetting the NVRAM will re-enable hyperthreading.
 
 ### Cache topology
 
-The cache topology on my machine (with Hyperthreading disabled) is as follows, using `lstopo` from the `hwloc` package:
+The cache topology on my test machine (with Hyperthreading disabled) is as follows, using `lstopo` from the `hwloc` package:
 
 ```bash
 lstopo - -v --no-io
