@@ -1,7 +1,12 @@
 ---
+toc: true
 title: "Cache Me If You Can"
-date: 2023-07-09T10:45:37+02:00
+date: 2023-07-09T10:00:00+02:00
+categories: ["multithreading", "zig"]
+published: true
 ---
+
+{{< table_of_contents >}}
 
 How come making a struct in Zig _less_ densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.
 <!--more-->
@@ -17,6 +22,8 @@ Imagine we're writing a multi-threaded queue. To avoid false sharing, we must to
 To something like this:
 
 ![Cachelines](/blog/images/false-sharing-good.png)
+
+Of course, `padding` can be replaced by other useful data as long as it doesn't cause false sharing.
 
 **Thread 1 only cares about `head_index`, while thread 2 only cares about `tail_index`. By padding the struct, we ensure that each thread has its own cache line and can thus update its field without invalidating the other thread's cache line.**
 

@@ -5,3 +5,9 @@ theme = 'PaperMod'
 [themeParams]
 defaultTheme = 'dark'
 disableThemeToggle = true
+
+[markup]
+  [markup.tableOfContents]
+    endLevel = 3
+    ordered = false
+    startLevel = 2

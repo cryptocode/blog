@@ -14,6 +14,9 @@ The goal of this project is to make it easy to play around with Lisp dialect ide
 
 *Acknowledgments: Bio is written in [Zig](ziglang.org), a fact I think awesome designer [Joy Machs](https://artstation.com/joymachs) was able to neatly incorporate into the lambda/lisp oriented logo. I uncovered a [stdlib bug](https://github.com/ziglang/zig/issues/8454) while working on this; thanks to [jumpnbrownweasel](https://github.com/jumpnbrownweasel) for fixing it quickly.*
 
+{{< table_of_contents >}}
+## Scope
+
 This initial iteration gives us a language with:
 
 * Higher-order functions with lexical scoping and enough juice to implement recursion in the language itself
@@ -26,6 +29,8 @@ This initial iteration gives us a language with:
 * A language reference
 * A small but extensible standard library written in Bio, with functions like filter, map, and quicksort
 * A REPL and a couple of ways to load and evaluate source files
+
+## Examples
 
 Here's a few sample Bio expressions:
 
