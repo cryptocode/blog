@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Docs | cryptocode</title>
+<title>multithreading | cryptocode</title>
 <meta name="keywords" content="">
-<meta name="description" content="Docs - cryptocode">
+<meta name="description" content="">
 <meta name="author" content="">
-<link rel="canonical" href="https://cryptocode.github.io/blog/docs/">
+<link rel="canonical" href="https://cryptocode.github.io/blog/categories/multithreading/">
 <link crossorigin="anonymous" href="/blog/assets/css/stylesheet.174413eb633337f9ef5559b1971a230b72b3f88ecd559baf9f55129e7ed6c011.css" integrity="sha256-F0QT62MzN/nvVVmxlxojC3Kz&#43;I7NVZuvn1USnn7WwBE=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
@@ -18,7 +18,7 @@
 <link rel="mask-icon" href="https://cryptocode.github.io/blog/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="https://cryptocode.github.io/blog/docs/index.xml">
+<link rel="alternate" type="application/rss+xml" href="https://cryptocode.github.io/blog/categories/multithreading/index.xml">
 <noscript>
     <style>
         #theme-toggle,
@@ -55,30 +55,15 @@
         }
 
     </style>
-</noscript><meta property="og:title" content="Docs" />
+</noscript><meta property="og:title" content="multithreading" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://cryptocode.github.io/blog/docs/" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/categories/multithreading/" />
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Docs"/>
+<meta name="twitter:title" content="multithreading"/>
 <meta name="twitter:description" content=""/>
 
-
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position":  1 ,
-      "name": "Docs",
-      "item": "https://cryptocode.github.io/blog/docs/"
-    }
-  ]
-}
-</script>
 </head>
 
 <body class="list" id="top">
@@ -127,11 +112,11 @@
 <main class="main"> 
 <header class="page-header">
   <h1>
-    Docs
+    multithreading
   </h1>
 </header>
 
-<article class="post-entry"> 
+<article class="post-entry tag-entry"> 
   <header class="entry-header">
     <h2>Cache Me If You Can
     </h2>
@@ -142,64 +127,6 @@
   </div>
   <footer class="entry-footer"><span title='2023-07-09 10:00:00 +0200 +0200'>July 9, 2023</span></footer>
   <a class="entry-link" aria-label="post link to Cache Me If You Can" href="https://cryptocode.github.io/blog/docs/falsesharing/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Async CPU bound workers in Zig
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Zig has async/await support, which is typically used for IO bound operations.
-In this article, however, we’ll use async/await to simplify writing a simple concurrent worker.
-Goal: use all the cores on the machine to find a randomly selected 64-bit number whose lower N bits are all cleared.
-How it works Instead of manually spinning up threads, we’re just going to use async/await, along with pub const io_mode = .evented; which informs the standard library to use a non-blocking event loop....</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-05-02 10:00:00 +0200 +0200'>May 2, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Async CPU bound workers in Zig" href="https://cryptocode.github.io/blog/docs/async/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Bio - All your parentheses are belong to us
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>In the previous Zig post, we wrote a small postfix notation calculator.
-This post takes a look at something that take prefix notation to the extreme: a new language in the Lisp family called Bio
-The goal of this project is to make it easy to play around with Lisp dialect ideas and to make a well-documented and readable Lisp interpreter for others to learn from. This article aims to point out some key areas people stumble on when writing a basic Lisp interpreter....</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-04-25 10:00:00 +0200 +0200'>April 25, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Bio - All your parentheses are belong to us" href="https://cryptocode.github.io/blog/docs/bio-introduction/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>A surprisingly capable RPN calculator in about 100 lines of Zig code
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Summary:
-Reverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let’s see if 2 &#43; 2 is still 4:
-2 2 &#43; M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:
-First we input the known values so these get memory slots we can reference, rather than repeating the constants....</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-03-01 10:00:00 +0200 +0200'>March 1, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to A surprisingly capable RPN calculator in about 100 lines of Zig code" href="https://cryptocode.github.io/blog/docs/prefix-calculator/"></a>
-</article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Running Zig binaries on a KaiOS device
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>The goal here is to:
-Cross-compile a Zig program Root a KaiOS device, and then install and run the cross-compiled program on the device We’re not making a GUI app or anything here, just a small “Hello world” program that we’ll cross-compile and run on the device. All sorts of interesting things can be done from this point on.
-I’m using Android’s adb to push files to the device and to get a shell, so you’ll have to install that first if you wanna follow along....</p>
-  </div>
-  <footer class="entry-footer"><span title='2021-01-27 10:00:00 +0200 +0200'>January 27, 2021</span></footer>
-  <a class="entry-link" aria-label="post link to Running Zig binaries on a KaiOS device" href="https://cryptocode.github.io/blog/docs/kaios/"></a>
 </article>
     </main>
      </body>

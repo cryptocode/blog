@@ -6,14 +6,30 @@
     <description>Recent content on cryptocode</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Jul 2023 10:45:37 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 09 Jul 2023 10:00:00 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Cache Me If You Can</title>
       <link>https://cryptocode.github.io/blog/docs/falsesharing/</link>
-      <pubDate>Sun, 09 Jul 2023 10:45:37 +0200</pubDate>
+      <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
       
       <guid>https://cryptocode.github.io/blog/docs/falsesharing/</guid>
-      <description>&lt;p&gt;How come making a struct in Zig &lt;em&gt;less&lt;/em&gt; densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.&lt;/p&gt;</description>
+      <description>&lt;div style=&#34;font-size: small;&#34;&gt;
+    &lt;nav id=&#34;TableOfContents&#34;&gt;
+  &lt;ul&gt;
+    &lt;li&gt;
+      &lt;ul&gt;
+        &lt;li&gt;&lt;a href=&#34;#cache-lines&#34;&gt;Cache lines&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#a-little-zig-surprise&#34;&gt;A little Zig surprise&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-code&#34;&gt;The code&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#the-numbers&#34;&gt;The numbers&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#hyperthreading-adds-a-twist&#34;&gt;Hyperthreading adds a twist&lt;/a&gt;&lt;/li&gt;
+        &lt;li&gt;&lt;a href=&#34;#cache-topology&#34;&gt;Cache topology&lt;/a&gt;&lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;
+&lt;/div&gt;
+&lt;p&gt;How come making a struct in Zig &lt;em&gt;less&lt;/em&gt; densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.&lt;/p&gt;</description>
     </item>
     
     <item>
