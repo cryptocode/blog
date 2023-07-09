@@ -1,20 +1,24 @@
 ---
 title: "Cache Me If You Can"
-date: 2023-07-08T18:45:37+02:00
+date: 2023-07-09T10:45:37+02:00
 ---
 
-How come adding a single keyword to a struct in Zig give a 56% performance increase, with far less variability? As it turns out, densely packed data structures and field reorderings can cause significant performance issues in multithreaded programs due to _false sharing_.
+How come making a struct in Zig less densely packed can give a 56% performance increase, with far less variability? This post takes a look at _false sharing_ and how it can be caused by packed data layouts and unintended field reorderings.
 <!--more-->
-While packing data closely together can be very beneficial due to cache locality, false sharing must be taking into account when designing optimal data layouts for multithreaded programs.
+While packing data closely together can be very beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.
 
 ### Cache lines
 False sharing occurs when the data layout is at odds with the memory access pattern, namely multiple threads managing separate data that happens to fall on the same _cache line_.
 
-A cache line is the smallest unit of transfer between Lx caches and main memory, and thus also the unit of synchronization of coherence protocols such as MESI.
+A cache line is the smallest unit of transfer between each core's local Lx caches and shared main memory, and thus also the unit of synchronization of coherence protocols such as MESI. Updating a cache line on one core will invalidate the corresponding line on all other cores' local caches.
 
 Cache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. The actual impact depends on a thread's affinity to core socket and hyperthreads, scheduling, and the number of threads.
 
-A cache line is typically 64 bytes, but this can vary between CPU architectures. Tools such as `lstopo` is useful to determine the cache line size and the cache hierachy on your CPU.
+A cache line is typically 64 bytes, but this varies between CPU architectures.
+
+![Cachelines](/images/cachelines1.png)
+
+Tools such as `lstopo` is useful to determine the cache hierachy and line size on your CPU.
 ### A little Zig surprise
 
 Take a look at this struct:
@@ -22,19 +26,19 @@ Take a look at this struct:
 ```zig
 const Queue = struct  {
     head_index: u64 = 0,
-    padding: [128]u8 = undefined,
+    padding: [64]u8 = undefined,
     tail_index: u64 = 0,
 };
 ```
 
 Now imagine you have two threads updating `head_index` and `tail_index` respectively.
 
-Changing the struct to the following makes the program run 30% faster on my Intel Core i9, and with an _order of magnitude_ lower standard deviation:
+Changing the struct to the following makes the benchmark run 56% faster on my Intel Core i9, and with an order of magnitude lower standard deviation:
 
 ```zig
 const Queue = extern struct  {
     head_index: u64 = 0,
-    padding: [128]u8 = undefined,
+    padding: [64]u8 = undefined,
     tail_index: u64 = 0,
 };
 ```
@@ -45,7 +49,7 @@ _Note that we can not use a_ `packed struct` _in this example as the padding typ
 
 For regular structs, Zig may reorder the fields to _minimize padding_, which is a good thing in general.
 
-However, by enforcing the ordering, the indended reason for padding causes `head_index` and `tail_index` to fall on different cache lines, and thus false sharing is avoided: The two threads can update their respective fields without invalidating each other's cache lines.
+However, by enforcing the ordering, the intended reason for padding causes `head_index` and `tail_index` to fall on different cache lines, and thus false sharing is avoided: The two threads can update their respective fields without invalidating each other's cache lines.
 
 To reduce the chance of false sharing, we must force a suitable field ordering, add padding fields or set alignment on specific fields.
 
@@ -53,7 +57,7 @@ To reduce the chance of false sharing, we must force a suitable field ordering, 
 
 The benchmark below demonstrates the issue. It is a simple queue implementation that is used by two threads, one that pushes items onto the queue, and one that pops items off the queue.
 
-Of course, a benchmark is designed to demonstrate a specific issue, and the numbers below are not representative of a real world application. However, if false sharing occurs on the hot path of your application, the performance impact can be significant.
+Of course, a benchmark is designed to demonstrate a specific issue, and the numbers below are not representative of a real-world application. However, if false sharing occurs on the hot path of your application, the performance impact can be significant.
 
 ```zig
 const std = @import("std");
@@ -98,7 +102,7 @@ hyperfine --export-json results-with-extern.json ./falsesharing
 Do the same without the `extern` keyword (rename the json output filename in the hyperfine command), and observe the difference.
 ### The numbers
 
-The following tables shows the benchmark summary and 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur. 
+The following tables contain the benchmark summary, 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur. 
 
 While a larger number of samples were taken to verify the effect, the numbers below are representative.
 
@@ -135,7 +139,7 @@ The timings above are with hyperthreading disabled. With hyperthreading enabled,
 
 On Linux, you might want to consider using `pthread_setaffinity_np` to pin threads to physical cores.
 
-This is currently not support on macOS. However, you can disable hyperthreading by entering safe mode and entering these commands in the terminal:
+This is currently not supported on macOS. However, you can disable hyperthreading by entering safe mode and entering these commands in the terminal:
 
 ```bash
 nvram boot-args="cwae=2"
