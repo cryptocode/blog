@@ -165,12 +165,42 @@ How it works Instead of manually spinning up threads, we’re just going to use 
     </h2>
   </header>
   <div class="entry-content">
-    <p>In the previous Zig post, we wrote a small postfix notation calculator.
+    <p>In a previous Zig post, we wrote a small postfix notation calculator.
 This post takes a look at something that take prefix notation to the extreme: a new language in the Lisp family called Bio
 The goal of this project is to make it easy to play around with Lisp dialect ideas and to make a well-documented and readable Lisp interpreter for others to learn from. This article aims to point out some key areas people stumble on when writing a basic Lisp interpreter....</p>
   </div>
   <footer class="entry-footer"><span title='2021-04-25 10:00:00 +0200 +0200'>April 25, 2021</span></footer>
   <a class="entry-link" aria-label="post link to Bio - All your parentheses are belong to us" href="https://cryptocode.github.io/blog/docs/bio-introduction/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Some notes on using Zig with Valgrind
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
+When I first did this, I ran into a couple of problems, which I’m jotting down here along with solutions.
+Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issues
+First of all, to get Valgrind going with Zig programs, you’ll have to switch to the C allocator....</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-04-25 09:00:00 +0200 +0200'>April 25, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to Some notes on using Zig with Valgrind" href="https://cryptocode.github.io/blog/docs/valgrind-zig/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2>Zig scripts?!?
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Look at this beauty:
+//usr/bin/env zig run &#34;$0&#34; -- &#34;$@&#34; ; exit const std = @import(&#34;std&#34;); pub fn main() !void { std.log.info(&#34;Awesome, it works\n&#34;, .{}); } Let’s make it executable and run it:
+chmod &#43;x myscript.zig ./myscript.zig info: Awesome, it works This works because // is a comment in Zig, and just an empty path component as far as the shell is concerned
+Thanks to squirl for making the argument passing syntax more robus</p>
+  </div>
+  <footer class="entry-footer"><span title='2021-04-24 10:00:00 +0200 +0200'>April 24, 2021</span></footer>
+  <a class="entry-link" aria-label="post link to Zig scripts?!?" href="https://cryptocode.github.io/blog/docs/shebang/"></a>
 </article>
 
 <article class="post-entry"> 

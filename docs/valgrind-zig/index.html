@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Some notes on using Zig with Valgrind | cryptocode</title>
+<meta name="keywords" content="">
+<meta name="description" content="Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
+When I first did this, I ran into a couple of problems, which I&rsquo;m jotting down here along with solutions.
+Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issues
+First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to switch to the C allocator.">
+<meta name="author" content="">
+<link rel="canonical" href="https://cryptocode.github.io/blog/docs/valgrind-zig/">
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.174413eb633337f9ef5559b1971a230b72b3f88ecd559baf9f55129e7ed6c011.css" integrity="sha256-F0QT62MzN/nvVVmxlxojC3Kz&#43;I7NVZuvn1USnn7WwBE=" rel="preload stylesheet" as="style">
+<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
+    onload="hljs.initHighlightingOnLoad();"></script>
+<link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://cryptocode.github.io/blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://cryptocode.github.io/blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Some notes on using Zig with Valgrind" />
+<meta property="og:description" content="Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
+When I first did this, I ran into a couple of problems, which I&rsquo;m jotting down here along with solutions.
+Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issues
+First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to switch to the C allocator." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/valgrind-zig/" /><meta property="article:section" content="docs" />
+<meta property="article:published_time" content="2021-04-25T09:00:00+02:00" />
+<meta property="article:modified_time" content="2021-04-25T09:00:00+02:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Some notes on using Zig with Valgrind"/>
+<meta name="twitter:description" content="Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
+When I first did this, I ran into a couple of problems, which I&rsquo;m jotting down here along with solutions.
+Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issues
+First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to switch to the C allocator."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Docs",
+      "item": "https://cryptocode.github.io/blog/docs/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Some notes on using Zig with Valgrind",
+      "item": "https://cryptocode.github.io/blog/docs/valgrind-zig/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Some notes on using Zig with Valgrind",
+  "name": "Some notes on using Zig with Valgrind",
+  "description": "Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.\nWhen I first did this, I ran into a couple of problems, which I\u0026rsquo;m jotting down here along with solutions.\nThanks to mikdusan, ifreund and lemonboy for helping me figure out various issues\nFirst of all, to get Valgrind going with Zig programs, you\u0026rsquo;ll have to switch to the C allocator.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.\nWhen I first did this, I ran into a couple of problems, which I’m jotting down here along with solutions.\nThanks to mikdusan, ifreund and lemonboy for helping me figure out various issues\nFirst of all, to get Valgrind going with Zig programs, you’ll have to switch to the C allocator. In my case, this was as easy as flipping\npub var allocator = \u0026gpa.allocator; to\npub var allocator = std.heap.c_allocator; You also need to link with libc, so add this to your build.zig file:\nexe.linkLibC(); Running Valgrind I used Valgrind 3.16.1 for this; old versions of Valgrind have limited/buggy dwarf4 support which manifests itself as missing symbols in traces.\nvalgrind --leak-check=full --track-origins=yes \\ --show-leak-kinds=all --num-callers=15 \\ --log-file=leak.txt ./my-app The --num-callers=15 is important (you can pick any suitable number of course), as otherwise you’ll get traces that are too short. For instance, I ran into a leak where the Reader interface was used, and the trace didn’t include any of my application code, only stdlib stuff.\nIllegal instruction ?? I ran Valgrind on a Linux machine with avx512, and got “Illegal instruction” on an @intToFloat cast. This was solved by adding -mcpu=native-avx512f to the build command, with mcpu=baseline being the safest option if you still run into issues.\nThis is due to a bug in Valgrind: https://bugs.kde.org/show_bug.cgi?id=383010\nSome more context here: https://github.com/ziglang/zig/issues/8615\n",
+  "wordCount" : "252",
+  "inLanguage": "en",
+  "datePublished": "2021-04-25T09:00:00+02:00",
+  "dateModified": "2021-04-25T09:00:00+02:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://cryptocode.github.io/blog/docs/valgrind-zig/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "cryptocode",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://cryptocode.github.io/blog/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="cryptocode (Alt + H)">cryptocode</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title">
+      Some notes on using Zig with Valgrind
+    </h1>
+    <div class="post-meta"><span title='2021-04-25 09:00:00 +0200 +0200'>April 25, 2021</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.</p>
+<p>When I first did this, I ran into a couple of problems, which I&rsquo;m jotting down here along with solutions.</p>
+<p><strong>Thanks to mikdusan, ifreund and lemonboy for helping me  figure out various issues</strong></p>
+<p>First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to switch to the C allocator. In my case, this was as easy as flipping</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">var</span> allocator <span style="color:#f92672">=</span> <span style="color:#f92672">&amp;</span>gpa.allocator;
+</span></span></code></pre></div><p>to</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">var</span> allocator <span style="color:#f92672">=</span> std.heap.c_allocator;
+</span></span></code></pre></div><p>You also need to link with libc, so add this to your build.zig file:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span>exe.linkLibC();
+</span></span></code></pre></div><h2 id="running-valgrind">Running Valgrind<a hidden class="anchor" aria-hidden="true" href="#running-valgrind">#</a></h2>
+<p>I used Valgrind 3.16.1 for this; old versions of Valgrind have limited/buggy dwarf4 support which manifests itself as missing symbols in traces.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>valgrind --leak-check<span style="color:#f92672">=</span>full --track-origins<span style="color:#f92672">=</span>yes <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>--show-leak-kinds<span style="color:#f92672">=</span>all --num-callers<span style="color:#f92672">=</span><span style="color:#ae81ff">15</span> <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>--log-file<span style="color:#f92672">=</span>leak.txt ./my-app
+</span></span></code></pre></div><p>The <code>--num-callers=15</code> is important (you can pick any suitable number of course), as otherwise you&rsquo;ll get traces that are too short. For instance, I ran into a leak where the Reader interface was used, and the trace didn&rsquo;t include any of my application code, only stdlib stuff.</p>
+<h2 id="illegal-instruction-">Illegal instruction ??<a hidden class="anchor" aria-hidden="true" href="#illegal-instruction-">#</a></h2>
+<p>I ran Valgrind on a Linux machine with avx512, and got &ldquo;Illegal instruction&rdquo; on an <code>@intToFloat</code> cast. This was solved by adding <code>-mcpu=native-avx512f</code> to the build command, with <code>mcpu=baseline</code> being the safest option if you still run into issues.</p>
+<p>This is due to a bug in Valgrind: <a href="https://bugs.kde.org/show_bug.cgi?id=383010">https://bugs.kde.org/show_bug.cgi?id=383010</a></p>
+<p>Some more context here: <a href="https://github.com/ziglang/zig/issues/8615">https://github.com/ziglang/zig/issues/8615</a></p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+     </body>
+
+</html>

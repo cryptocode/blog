@@ -54,6 +54,30 @@ How it works Instead of manually spinning up threads, we&amp;rsquo;re just going
     </item>
     
     <item>
+      <title>Some notes on using Zig with Valgrind</title>
+      <link>https://cryptocode.github.io/blog/docs/valgrind-zig/</link>
+      <pubDate>Sun, 25 Apr 2021 09:00:00 +0200</pubDate>
+      
+      <guid>https://cryptocode.github.io/blog/docs/valgrind-zig/</guid>
+      <description>Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
+When I first did this, I ran into a couple of problems, which I&amp;rsquo;m jotting down here along with solutions.
+Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issues
+First of all, to get Valgrind going with Zig programs, you&amp;rsquo;ll have to switch to the C allocator.</description>
+    </item>
+    
+    <item>
+      <title>Zig scripts?!?</title>
+      <link>https://cryptocode.github.io/blog/docs/shebang/</link>
+      <pubDate>Sat, 24 Apr 2021 10:00:00 +0200</pubDate>
+      
+      <guid>https://cryptocode.github.io/blog/docs/shebang/</guid>
+      <description>Look at this beauty:
+//usr/bin/env zig run &amp;#34;$0&amp;#34; -- &amp;#34;$@&amp;#34; ; exit const std = @import(&amp;#34;std&amp;#34;); pub fn main() !void { std.log.info(&amp;#34;Awesome, it works\n&amp;#34;, .{}); } Let&amp;rsquo;s make it executable and run it:
+chmod +x myscript.zig ./myscript.zig info: Awesome, it works This works because // is a comment in Zig, and just an empty path component as far as the shell is concerned
+Thanks to squirl for making the argument passing syntax more robus</description>
+    </item>
+    
+    <item>
       <title>A surprisingly capable RPN calculator in about 100 lines of Zig code</title>
       <link>https://cryptocode.github.io/blog/docs/prefix-calculator/</link>
       <pubDate>Mon, 01 Mar 2021 10:00:00 +0200</pubDate>
