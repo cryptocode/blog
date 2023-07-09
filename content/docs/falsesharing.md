@@ -3,15 +3,18 @@ title: "Cache Me If You Can"
 date: 2023-07-08T18:45:37+02:00
 ---
 
-Why would adding a single keyword to a struct in Zig give a 30% performance increase, with far less variability? As it turns out, tightly packed data structures and field reorderings can cause surprising performance issues in multithreaded programs due to _false sharing_. Let's look at the numbers.
+How come adding a single keyword to a struct in Zig give a 56% performance increase, with far less variability? As it turns out, densely packed data structures and field reorderings can cause significant performance issues in multithreaded programs due to _false sharing_.
 <!--more-->
-False sharing occurs when the data layout is at odds with the memory access pattern, namely multiple threads managing unrelated data that happens to fall on the same _cache line_.
+While packing data closely together can be very beneficial due to cache locality, false sharing must be taking into account when designing optimal data layouts for multithreaded programs.
 
-A cache line is the smallest unit of transfer between Lx caches and main memory, and thus also the unit of synchronization of coherence protocols such as MESI. When a thread on a core updates a memory location, the affected cache line is marked as dirty and other cores (logical or not) must invalidate their copy of the cache line.
+### Cache lines
+False sharing occurs when the data layout is at odds with the memory access pattern, namely multiple threads managing separate data that happens to fall on the same _cache line_.
 
-Cache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. When false sharing does happen, the actual impact depends on a thread's affinity to core socket/hyperthreads, scheduling, and the number of threads.
+A cache line is the smallest unit of transfer between Lx caches and main memory, and thus also the unit of synchronization of coherence protocols such as MESI.
 
-A cache line is typically 64 bytes, but this can vary depending on the CPU architecture. Tools such as `lstopo` is useful to determine the cache line size and the cache hierachy on your system.
+Cache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. The actual impact depends on a thread's affinity to core socket and hyperthreads, scheduling, and the number of threads.
+
+A cache line is typically 64 bytes, but this can vary between CPU architectures. Tools such as `lstopo` is useful to determine the cache line size and the cache hierachy on your CPU.
 ### A little Zig surprise
 
 Take a look at this struct:
@@ -24,7 +27,7 @@ const Queue = struct  {
 };
 ```
 
-Now imagine you have two threads updating `head_index` and `tail_index`.
+Now imagine you have two threads updating `head_index` and `tail_index` respectively.
 
 Changing the struct to the following makes the program run 30% faster on my Intel Core i9, and with an _order of magnitude_ lower standard deviation:
 
@@ -48,21 +51,60 @@ To reduce the chance of false sharing, we must force a suitable field ordering, 
 
 ### The code
 
-Here's a simple benchmark that demonstrates the issue:
+The benchmark below demonstrates the issue. It is a simple queue implementation that is used by two threads, one that pushes items onto the queue, and one that pops items off the queue.
+
+Of course, a benchmark is designed to demonstrate a specific issue, and the numbers below are not representative of a real world application. However, if false sharing occurs on the hot path of your application, the performance impact can be significant.
 
 ```zig
 const std = @import("std");
-blah blah blah
+
+// Remove "extern" to observe false sharing
+const Data = extern struct  {
+    head_index: u64 align(64) = 0,
+    padding: [128]u8 = undefined,
+    tail_index: u64 = 0,
+};
+
+fn updateHeadIndex(data: anytype) anyerror!void {
+    for (0..2000000000) |i| {
+        data.head_index += 1;
+        std.math.doNotOptimizeAway(i);
+    }
+}
+
+fn updateTailIndex(data: anytype) anyerror!void {
+    for (0..2000000000) |i| {
+        data.tail_index += 1;
+        std.math.doNotOptimizeAway(i);
+    }
+}
+
+pub fn main() anyerror!void {
+    var data: Data = .{};
+    var head_thread = try std.Thread.spawn(.{}, updateHeadIndex, .{&data});
+    var tail_thread = try std.Thread.spawn(.{}, updateTailIndex, .{&data});
+    head_thread.join();
+    tail_thread.join();
+}
 ```
 
-The `doNotOptimizeAway(i)` boils down to `asm volatile ("" :: [i] "r" (i),);` on my machine, which is a compiler barrier that prevents the compiler from simply optimizing away the loop (which wouldn't make for a useful benchmark)
+The `doNotOptimizeAway(i)` call boils down to `asm volatile ("" :: [i] "r" (i),);` on my system, which is a barrier that prevents the compiler from simply optimizing away the loop (which wouldn't make for a useful benchmark)
+
+```bash
+zig build-exe -OReleaseFast falsesharing.zig
+hyperfine --export-json results-with-extern.json ./falsesharing   
+```
+
+Do the same without the `extern` keyword (rename the json output filename in the hyperfine command), and observe the difference.
 ### The numbers
 
 The following tables shows the benchmark summary and 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur. 
 
 While a larger number of samples were taken to verify the effect, the numbers below are representative.
 
-Not only is the average time for the false sharing case worse, the standard deviation is also an order of magnitude higher.
+Not only is the average time for the false sharing case significantly worse, the standard deviation is also an order of magnitude higher.
+
+Timings are measured in seconds.
 
 | | No false sharing | False sharing |
 | --- | --- | --- |
@@ -76,36 +118,82 @@ The actual runs:
 
 | No false sharing | False sharing |
 | --- | --- |
-| 3.04404566866 | 4.582206681904999 |
-| 3.0200773766599998 | 4.732641409905 |
-| 3.0460710066599996 | 5.081537872905 |
-| 3.02459747266 | 4.680716246905 |
-| 3.01537040366 | 4.750897377905 |
-| 3.03074159466 | 4.733568547905 |
-| 3.02830799766 | 4.678189750905 |
-| 3.0449196536599996 | 4.725284926904999 |
-| 3.02619737766 | 4.742324924905 |
-| 3.0186892736599997 | 4.677949589904999 |
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+| 3.0440456 | 4.5822066 |
+| 3.0200773 | 4.7326414 |
+| 3.0460710 | 5.0815378 |
+| 3.0245974 | 4.6807162 |
+| 3.0153704 | 4.7508973 |
+| 3.0307415 | 4.7335685 |
+| 3.0283079 | 4.6781897 |
+| 3.0449196 | 4.7252849 |
+| 3.0261973 | 4.7423249 |
+| 3.0186892 | 4.6779495 |
 
 ### Hyperthreading adds a twist
 
 The timings above are with hyperthreading disabled. With hyperthreading enabled, the timings for the false sharing case are much more variable, but still consistently worse than the no false sharing case.
+
+On Linux, you might want to consider using `pthread_setaffinity_np` to pin threads to physical cores.
+
+This is currently not support on macOS. However, you can disable hyperthreading by entering safe mode and entering these commands in the terminal:
+
+```bash
+nvram boot-args="cwae=2"
+nvram SMTDisable=%01
+```
+
+After rebooting, System Information (click Apple icon in the menu bar while holding Alt) should report `Hyper-Threading Technology: Disabled"
+
+Resetting the NVRAM will re-enable hyperthreading.
+
+### Cache topology
+
+The cache topology on my machine (with Hyperthreading disabled) is as follows, using `lstopo` from the `hwloc` package:
+
+```bash
+lstopo - -v --no-io
+
+  Package L#0
+    NUMANode L#0 (P#0 local=33554432KB total=33554432KB)
+    L3Cache L#0 (size=16384KB linesize=64)
+      L2Cache L#0 (size=256KB linesize=64)
+        L1dCache L#0 (size=32KB linesize=64)
+          L1iCache L#0 (size=32KB linesize=64)
+            Core L#0 (P#0)
+              PU L#0 (P#0)
+      L2Cache L#1 (size=256KB linesize=64)
+        L1dCache L#1 (size=32KB linesize=64)
+          L1iCache L#1 (size=32KB linesize=64)
+            Core L#1 (P#1)
+              PU L#1 (P#1)
+      L2Cache L#2 (size=256KB linesize=64)
+        L1dCache L#2 (size=32KB linesize=64)
+          L1iCache L#2 (size=32KB linesize=64)
+            Core L#2 (P#2)
+              PU L#2 (P#2)
+      L2Cache L#3 (size=256KB linesize=64)
+        L1dCache L#3 (size=32KB linesize=64)
+          L1iCache L#3 (size=32KB linesize=64)
+            Core L#3 (P#3)
+              PU L#3 (P#3)
+      L2Cache L#4 (size=256KB linesize=64)
+        L1dCache L#4 (size=32KB linesize=64)
+          L1iCache L#4 (size=32KB linesize=64)
+            Core L#4 (P#4)
+              PU L#4 (P#4)
+      L2Cache L#5 (size=256KB linesize=64)
+        L1dCache L#5 (size=32KB linesize=64)
+          L1iCache L#5 (size=32KB linesize=64)
+            Core L#5 (P#5)
+              PU L#5 (P#5)
+      L2Cache L#6 (size=256KB linesize=64)
+        L1dCache L#6 (size=32KB linesize=64)
+          L1iCache L#6 (size=32KB linesize=64)
+            Core L#6 (P#6)
+              PU L#6 (P#6)
+      L2Cache L#7 (size=256KB linesize=64)
+        L1dCache L#7 (size=32KB linesize=64)
+          L1iCache L#7 (size=32KB linesize=64)
+            Core L#7 (P#7)
+              PU L#7 (P#7)
+```
