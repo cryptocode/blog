@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Docs on Cryptocode</title>
+    <title>Docs on cryptocode</title>
     <link>https://cryptocode.github.io/blog/docs/</link>
-    <description>Recent content in Docs on Cryptocode</description>
+    <description>Recent content in Docs on cryptocode</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 08 Jul 2023 18:45:37 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/docs/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Stuff about things</title>
-      <link>https://cryptocode.github.io/blog/docs/test/</link>
+      <title>Cache Me If You Can</title>
+      <link>https://cryptocode.github.io/blog/docs/falsesharing/</link>
       <pubDate>Sat, 08 Jul 2023 18:45:37 +0200</pubDate>
       
-      <guid>https://cryptocode.github.io/blog/docs/test/</guid>
-      <description>Putting some more numbers on false sharing cost using Zig</description>
+      <guid>https://cryptocode.github.io/blog/docs/falsesharing/</guid>
+      <description>&lt;p&gt;Why would adding a single keyword to a struct in Zig give a 30% performance increase, with far less variability? As it turns out, tightly packed data structures and field reorderings can cause surprising performance issues in multithreaded programs due to &lt;em&gt;false sharing&lt;/em&gt;. Let&amp;rsquo;s look at the numbers.&lt;/p&gt;</description>
     </item>
     
   </channel>
