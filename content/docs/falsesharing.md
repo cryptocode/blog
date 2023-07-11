@@ -143,7 +143,7 @@ The actual runs:
 
 ### Hyperthreading adds a twist
 
-The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run times are still consistently much worse than the no false sharing case.
+The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run times are still much worse than the no false sharing case. Hyperthreading also adds more variance, 0.06 vs 0.011 standard deviation.
 
 On Linux, you might want to consider using `pthread_setaffinity_np` to pin threads to physical cores.
 
