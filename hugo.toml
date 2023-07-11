@@ -2,7 +2,8 @@ baseURL = 'https://cryptocode.github.io/blog/'
 languageCode = 'en-us'
 title = 'cryptocode'
 theme = 'PaperMod'
-[themeParams]
+
+[Params]
 defaultTheme = 'dark'
 disableThemeToggle = true
 
