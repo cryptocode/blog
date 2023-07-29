@@ -33,6 +33,6 @@ tbody {
     --color: var(--primary);
     color: transparent;
     font-family: 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    font-size: 45px;
-    -webkit-text-stroke: 2px rgb(85, 174, 229);
+    font-size: 40px;
+    -webkit-text-stroke: 1px rgb(188, 209, 222);
 }
