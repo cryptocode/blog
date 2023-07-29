@@ -210,7 +210,7 @@ In this case, we do need the function prologue and epilogue, because we're using
 
 This source is based on a disassembly on Compiler Explorer.
 
-```asm
+```nasm
 [BITS 64]
 fast_memcpy:
         push    rbp
@@ -270,7 +270,7 @@ fast_memcpy:
 
 `asm-syscall.s`
 
-```asm
+```nasm
 [BITS 64]
 ; set up syscall arguments
 mov     rdx, rsi
