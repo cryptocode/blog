@@ -69,6 +69,19 @@
 
 <article class="first-entry"> 
   <header class="entry-header">
+    <h2>Embedding machine code in Zig instead of using inline assembly
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Object files vs. raw machine code Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
+Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in standard libraries Accessing microcontroller features on embedded systems Handwriting a performance-critical hot-path function where the optimizer doesn’t do the right thing Inline assembly, however, can quickly get unwieldy, and getting the input/output constraints right can be tricky....</p>
+  </div>
+  <footer class="entry-footer"><span title='2023-07-29 12:01:51 +0200 +0200'>July 29, 2023</span></footer>
+  <a class="entry-link" aria-label="post link to Embedding machine code in Zig instead of using inline assembly" href="https://cryptocode.github.io/blog/docs/machinecode/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2>Cache Me If You Can
     </h2>
   </header>

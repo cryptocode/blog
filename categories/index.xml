@@ -6,22 +6,31 @@
     <description>Recent content in Categories on cryptocode</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Jul 2023 10:00:00 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>multithreading</title>
-      <link>https://cryptocode.github.io/blog/categories/multithreading/</link>
-      <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
+      <title>asm</title>
+      <link>https://cryptocode.github.io/blog/categories/asm/</link>
+      <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
       
-      <guid>https://cryptocode.github.io/blog/categories/multithreading/</guid>
+      <guid>https://cryptocode.github.io/blog/categories/asm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>zig</title>
       <link>https://cryptocode.github.io/blog/categories/zig/</link>
-      <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
+      <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
       
       <guid>https://cryptocode.github.io/blog/categories/zig/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>multithreading</title>
+      <link>https://cryptocode.github.io/blog/categories/multithreading/</link>
+      <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
+      
+      <guid>https://cryptocode.github.io/blog/categories/multithreading/</guid>
       <description></description>
     </item>
     

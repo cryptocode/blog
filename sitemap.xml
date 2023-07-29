@@ -2,22 +2,28 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
+    <loc>https://cryptocode.github.io/blog/categories/asm/</loc>
+    <lastmod>2023-07-29T12:01:51+02:00</lastmod>
+  </url><url>
+    <loc>https://cryptocode.github.io/blog/categories/</loc>
+    <lastmod>2023-07-29T12:01:51+02:00</lastmod>
+  </url><url>
+    <loc>https://cryptocode.github.io/blog/</loc>
+    <lastmod>2023-07-29T12:01:51+02:00</lastmod>
+  </url><url>
+    <loc>https://cryptocode.github.io/blog/docs/</loc>
+    <lastmod>2023-07-29T12:01:51+02:00</lastmod>
+  </url><url>
+    <loc>https://cryptocode.github.io/blog/docs/machinecode/</loc>
+    <lastmod>2023-07-29T12:01:51+02:00</lastmod>
+  </url><url>
+    <loc>https://cryptocode.github.io/blog/categories/zig/</loc>
+    <lastmod>2023-07-29T12:01:51+02:00</lastmod>
+  </url><url>
     <loc>https://cryptocode.github.io/blog/docs/falsesharing/</loc>
     <lastmod>2023-07-09T10:00:00+02:00</lastmod>
   </url><url>
-    <loc>https://cryptocode.github.io/blog/categories/</loc>
-    <lastmod>2023-07-09T10:00:00+02:00</lastmod>
-  </url><url>
-    <loc>https://cryptocode.github.io/blog/</loc>
-    <lastmod>2023-07-09T10:00:00+02:00</lastmod>
-  </url><url>
-    <loc>https://cryptocode.github.io/blog/docs/</loc>
-    <lastmod>2023-07-09T10:00:00+02:00</lastmod>
-  </url><url>
     <loc>https://cryptocode.github.io/blog/categories/multithreading/</loc>
-    <lastmod>2023-07-09T10:00:00+02:00</lastmod>
-  </url><url>
-    <loc>https://cryptocode.github.io/blog/categories/zig/</loc>
     <lastmod>2023-07-09T10:00:00+02:00</lastmod>
   </url><url>
     <loc>https://cryptocode.github.io/blog/docs/async/</loc>

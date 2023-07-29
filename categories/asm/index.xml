@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>asm on cryptocode</title>
+    <link>https://cryptocode.github.io/blog/categories/asm/</link>
+    <description>Recent content in asm on cryptocode</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/asm/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Embedding machine code in Zig instead of using inline assembly</title>
+      <link>https://cryptocode.github.io/blog/docs/machinecode/</link>
+      <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
+      
+      <guid>https://cryptocode.github.io/blog/docs/machinecode/</guid>
+      <description>Object files vs. raw machine code Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
+Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in standard libraries Accessing microcontroller features on embedded systems Handwriting a performance-critical hot-path function where the optimizer doesn&amp;rsquo;t do the right thing Inline assembly, however, can quickly get unwieldy, and getting the input/output constraints right can be tricky.</description>
+    </item>
+    
+  </channel>
+</rss>

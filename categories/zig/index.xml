@@ -6,7 +6,17 @@
     <description>Recent content in zig on cryptocode</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 09 Jul 2023 10:00:00 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/zig/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/zig/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Embedding machine code in Zig instead of using inline assembly</title>
+      <link>https://cryptocode.github.io/blog/docs/machinecode/</link>
+      <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
+      
+      <guid>https://cryptocode.github.io/blog/docs/machinecode/</guid>
+      <description>Object files vs. raw machine code Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
+Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in standard libraries Accessing microcontroller features on embedded systems Handwriting a performance-critical hot-path function where the optimizer doesn&amp;rsquo;t do the right thing Inline assembly, however, can quickly get unwieldy, and getting the input/output constraints right can be tricky.</description>
+    </item>
+    
     <item>
       <title>Cache Me If You Can</title>
       <link>https://cryptocode.github.io/blog/docs/falsesharing/</link>
