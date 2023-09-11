@@ -12,7 +12,7 @@
 }
 
 .dark {
-    --xtheme: #5d4531;
+    --theme: #5d4531;
     --entry: #202062;
     --primary: rgba(247, 168, 129, 0.96);
     --secondary: rgba(235, 235, 255, 0.66);
@@ -23,3 +23,9 @@
     --border: #446;
 }
 */
+
+.dark {
+    --theme: hsl(210deg, 30%, 8%);
+    --hljs-bg: hsl(210deg, 20%, 13%);
+    --entry: hsl(210deg, 20%, 13%);
+}

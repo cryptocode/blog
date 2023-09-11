@@ -1,6 +1,6 @@
 main {
     --main-width: 1024px;
-    font-size: 16px;
+    font-size: 19px;
 }
 
 body #moon {
@@ -13,20 +13,20 @@ body #sun {
 }
 
 .main h1 {
-    font-size: 30px;
+    font-size: 32px;
 }
 
 
 .main h2 {
-    font-size: 25px;
+    font-size: 27px;
 }
 
 .main h3 {
-    font-size: 20px;
+    font-size: 23px;
 }
 
 tbody {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .logo a {
