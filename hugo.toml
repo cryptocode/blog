@@ -1,6 +1,6 @@
 baseURL = 'https://cryptocode.github.io/blog/'
 languageCode = 'en-us'
-title = 'cryptocode'
+title = "Roger's blog"
 theme = 'PaperMod'
 
 [Params]
