@@ -1,3 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Qwitcher+Grypen:wght@400;700&display=swap');
+
+.qwitcher-grypen-bold {
+  font-family: "Qwitcher Grypen", cursive, 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
 main {
     --main-width: 1024px;
     font-size: 16px;
@@ -30,9 +38,12 @@ tbody {
 }
 
 .logo a {
-    --color: var(--primary);
-    color: #ff9f11;
-    font-family: 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: "Qwitcher Grypen", cursive, 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-weight: 700;
+    font-style: normal;
+
     font-size: 40px;
-    /* -webkit-text-stroke: 1px rgb(188, 209, 222); */
+
+    --color: var(--primary);
+    color: #fffff0;
 }

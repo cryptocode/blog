@@ -1,11 +1,16 @@
 baseURL = 'https://cryptocode.github.io/blog/'
 languageCode = 'en-us'
-title = "Roger's blog"
+title = " Roger's Blog"
 theme = 'PaperMod'
 
 [Params]
 defaultTheme = 'dark'
 disableThemeToggle = true
+images = ["images/mondrian.png"]
+
+[Params.label]
+  icon = "images/mondrian.png"
+  iconHeight = 35
 
 [markup]
   [markup.tableOfContents]
