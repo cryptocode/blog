@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Some notes on using Zig with Valgrind | Roger&#39;s blog</title>
+<title>Some notes on using Zig with Valgrind |  Roger&#39;s Blog</title>
 <meta name="keywords" content="">
 <meta name="description" content="Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
 When I first did this, I ran into a couple of problems, which I&rsquo;m jotting down here along with solutions.
@@ -13,9 +13,7 @@ Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issue
 First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to switch to the C allocator.">
 <meta name="author" content="">
 <link rel="canonical" href="https://cryptocode.github.io/blog/docs/valgrind-zig/">
-<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.477c66c7b447db15333d0dde413a631316108b717f7eb1a1c64f64374ef55b3d.css" integrity="sha256-R3xmx7RH2xUzPQ3eQTpjExYQi3F/frGhxk9kN071Wz0=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.052097e3fd19b221854fe91635ca1090bc0f4081cdaa8eb8b4f44fd8d9c6b3de.css" integrity="sha256-BSCX4/0ZsiGFT&#43;kWNcoQkLwPQIHNqo64tPRP2NnGs94=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
@@ -37,11 +35,14 @@ When I first did this, I ran into a couple of problems, which I&rsquo;m jotting 
 Thanks to mikdusan, ifreund and lemonboy for helping me figure out various issues
 First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to switch to the C allocator." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://cryptocode.github.io/blog/docs/valgrind-zig/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/valgrind-zig/" />
+<meta property="og:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta property="article:section" content="docs" />
 <meta property="article:published_time" content="2021-04-25T09:00:00+02:00" />
 <meta property="article:modified_time" content="2021-04-25T09:00:00+02:00" />
 
-<meta name="twitter:card" content="summary"/>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
 <meta name="twitter:title" content="Some notes on using Zig with Valgrind"/>
 <meta name="twitter:description" content="Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.
 When I first did this, I ran into a couple of problems, which I&rsquo;m jotting down here along with solutions.
@@ -82,7 +83,7 @@ First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to swit
   "articleBody": "Zig has a very nice built-in memory leak detector in its General Purpose Allocator (GPA), but sometimes you have to break out Valgrind to get to the bottom of things.\nWhen I first did this, I ran into a couple of problems, which I’m jotting down here along with solutions.\nThanks to mikdusan, ifreund and lemonboy for helping me figure out various issues\nFirst of all, to get Valgrind going with Zig programs, you’ll have to switch to the C allocator. In my case, this was as easy as flipping\npub var allocator = \u0026gpa.allocator; to\npub var allocator = std.heap.c_allocator; You also need to link with libc, so add this to your build.zig file:\nexe.linkLibC(); Running Valgrind I used Valgrind 3.16.1 for this; old versions of Valgrind have limited/buggy dwarf4 support which manifests itself as missing symbols in traces.\nvalgrind --leak-check=full --track-origins=yes \\ --show-leak-kinds=all --num-callers=15 \\ --log-file=leak.txt ./my-app The --num-callers=15 is important (you can pick any suitable number of course), as otherwise you’ll get traces that are too short. For instance, I ran into a leak where the Reader interface was used, and the trace didn’t include any of my application code, only stdlib stuff.\nIllegal instruction ?? I ran Valgrind on a Linux machine with avx512, and got “Illegal instruction” on an @intToFloat cast. This was solved by adding -mcpu=native-avx512f to the build command, with mcpu=baseline being the safest option if you still run into issues.\nThis is due to a bug in Valgrind: https://bugs.kde.org/show_bug.cgi?id=383010\nSome more context here: https://github.com/ziglang/zig/issues/8615\n",
   "wordCount" : "252",
   "inLanguage": "en",
-  "datePublished": "2021-04-25T09:00:00+02:00",
+  "image": "https://cryptocode.github.io/blog/images/mondrian.png","datePublished": "2021-04-25T09:00:00+02:00",
   "dateModified": "2021-04-25T09:00:00+02:00",
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -90,7 +91,7 @@ First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to swit
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Roger's blog",
+    "name": " Roger's Blog",
     "logo": {
       "@type": "ImageObject",
       "url": "https://cryptocode.github.io/blog/favicon.ico"
@@ -105,7 +106,9 @@ First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to swit
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="Roger&#39;s blog (Alt + H)">Roger&#39;s blog</a>
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title=" Roger&#39;s Blog (Alt + H)">
+                <img src="https://cryptocode.github.io/blog/images/mondrian.png" alt="" aria-label="logo"
+                    height="35"> Roger&#39;s Blog</a>
             <div class="logo-switches">
             </div>
         </div>
@@ -118,7 +121,7 @@ First of all, to get Valgrind going with Zig programs, you&rsquo;ll have to swit
 <article class="post-single">
   <header class="post-header">
     
-    <h1 class="post-title">
+    <h1 class="post-title entry-hint-parent">
       Some notes on using Zig with Valgrind
     </h1>
     <div class="post-meta"><span title='2021-04-25 09:00:00 +0200 +0200'>April 25, 2021</span>

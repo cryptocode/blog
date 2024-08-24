@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Categories on Roger&#39;s blog</title>
+    <title>Categories on  Roger&#39;s Blog</title>
     <link>https://cryptocode.github.io/blog/categories/</link>
-    <description>Recent content in Categories on Roger&#39;s blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <description>Recent content in Categories on  Roger&#39;s Blog</description>
+    <image>
+      <title> Roger&#39;s Blog</title>
+      <url>https://cryptocode.github.io/blog/images/mondrian.png</url>
+      <link>https://cryptocode.github.io/blog/images/mondrian.png</link>
+    </image>
+    <generator>Hugo -- 0.115.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate>
+    <atom:link href="https://cryptocode.github.io/blog/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>asm</title>
       <link>https://cryptocode.github.io/blog/categories/asm/</link>
-      <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
-      
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://cryptocode.github.io/blog/categories/asm/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>zig</title>
       <link>https://cryptocode.github.io/blog/categories/zig/</link>
-      <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
-      
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://cryptocode.github.io/blog/categories/zig/</guid>
       <description></description>
     </item>
-    
     <item>
       <title>multithreading</title>
       <link>https://cryptocode.github.io/blog/categories/multithreading/</link>
-      <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
-      
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       <guid>https://cryptocode.github.io/blog/categories/multithreading/</guid>
       <description></description>
     </item>
-    
   </channel>
 </rss>

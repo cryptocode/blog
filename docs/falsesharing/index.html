@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Cache Me If You Can | Roger&#39;s blog</title>
+<title>Cache Me If You Can |  Roger&#39;s Blog</title>
 <meta name="keywords" content="">
 <meta name="description" content="
     
@@ -26,9 +26,7 @@
 How come making a struct in Zig less densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.">
 <meta name="author" content="">
 <link rel="canonical" href="https://cryptocode.github.io/blog/docs/falsesharing/">
-<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.477c66c7b447db15333d0dde413a631316108b717f7eb1a1c64f64374ef55b3d.css" integrity="sha256-R3xmx7RH2xUzPQ3eQTpjExYQi3F/frGhxk9kN071Wz0=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.052097e3fd19b221854fe91635ca1090bc0f4081cdaa8eb8b4f44fd8d9c6b3de.css" integrity="sha256-BSCX4/0ZsiGFT&#43;kWNcoQkLwPQIHNqo64tPRP2NnGs94=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
@@ -63,11 +61,14 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 
 How come making a struct in Zig less densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://cryptocode.github.io/blog/docs/falsesharing/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/falsesharing/" />
+<meta property="og:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta property="article:section" content="docs" />
 <meta property="article:published_time" content="2023-07-09T10:00:00+02:00" />
 <meta property="article:modified_time" content="2023-07-09T10:00:00+02:00" />
 
-<meta name="twitter:card" content="summary"/>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
 <meta name="twitter:title" content="Cache Me If You Can"/>
 <meta name="twitter:description" content="
     
@@ -121,7 +122,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
   "articleBody": " Cache lines A little Zig surprise The code The numbers Hyperthreading adds a twist Cache topology How come making a struct in Zig less densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.\nWhile packing data closely together can be very beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.\nCache lines False sharing occurs when the data layout is at odds with the memory access pattern, namely threads updating thread-specific data that happens to fall on the same cache line.\nImagine we’re writing a multi-threaded queue. To avoid false sharing, we must to go from this situation:\nTo something like this:\nOf course, padding can be replaced by other useful data as long as it doesn’t cause false sharing.\nThread 1 only cares about head_index, while thread 2 only cares about tail_index. By padding the struct, we ensure that each thread has its own cache line and can thus update its field without invalidating the other thread’s cache line.\nA cache line is the smallest unit of transfer between each core’s local Lx caches and shared main memory, and thus also the unit of synchronization of coherence protocols such as MESI. Updating a cache line on one core will invalidate the corresponding line on all other cores’ local caches.\nCache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. The actual impact depends on a thread’s affinity to core socket and hyperthreads, scheduling, and the number of threads. Memory access not involving false sharing may also be affected due to intra-socket coherence traffic saturation.\nA cache line is typically 64 bytes, but this varies between CPU architectures. Tools such as lstopo are useful to determine the cache hierachy and line size on your CPU.\nA little Zig surprise Take a look at this struct:\nconst Queue = struct { head_index: u64 = 0, padding: [64]u8 = undefined, tail_index: u64 = 0, }; Now imagine you have two threads updating head_index and tail_index respectively.\nChanging the struct to the following makes the benchmark run 56% faster on my Intel Core i9, and with an order of magnitude lower standard deviation:\nconst Queue = extern struct { head_index: u64 = 0, padding: [64]u8 = undefined, tail_index: u64 = 0, }; The difference? The extern keyword. This tells the compiler to adhere to the C ABI, which means the compiler will not reorder the fields.\nNote that we can not use a packed struct in this example as the padding type is not supported. In Zig, packed structs are just fancy integers\nFor regular structs, Zig is free to reorder the fields to minimize padding, which is a good thing in general.\nHowever, by enforcing the specified order, the padding field fulfills its intended purpose: It places head_index and tail_index on separate cache lines.\nThe code The benchmark is designed to demonstrate the issue at hand, and the results are not necessarily representative of false sharing slowdowns in a real-world application. That said, if false sharing occurs in a hot path, the impact can be significant.\nconst std = @import(\"std\"); // Remove \"extern\" to observe false sharing const Data = extern struct { head_index: u64 align(64) = 0, padding: [128]u8 = undefined, tail_index: u64 = 0, }; fn updateHeadIndex(data: anytype) anyerror!void { for (0..2000000000) |i| { data.head_index += 1; std.math.doNotOptimizeAway(i); } } fn updateTailIndex(data: anytype) anyerror!void { for (0..2000000000) |i| { data.tail_index += 1; std.math.doNotOptimizeAway(i); } } pub fn main() anyerror!void { var data: Data = .{}; var head_thread = try std.Thread.spawn(.{}, updateHeadIndex, .{\u0026data}); var tail_thread = try std.Thread.spawn(.{}, updateTailIndex, .{\u0026data}); head_thread.join(); tail_thread.join(); } The doNotOptimizeAway(i) call boils down to asm volatile (\"\" :: [i] \"r\" (i),); on my system, which is a barrier that prevents the compiler from simply optimizing away the loop (which wouldn’t make for a useful benchmark)\nzig build-exe -OReleaseFast falsesharing.zig hyperfine --export-json results-with-extern.json ./falsesharing Do the same without the extern keyword (rename the json output filename in the hyperfine command), and observe the difference.\nThe numbers The following tables contain the benchmark summary, 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur.\nWhile a larger number of samples were taken to verify the effect, the numbers below are representative for the findings.\nNot only is the average time for the false sharing case significantly worse, the standard deviation is also an order of magnitude higher.\nTimings are measured in seconds.\nNo false sharing False sharing mean 3.0299017825599996 4.738531733004999 stddev 0.011379971724662449 0.13044659161376454 median 3.02725268766 4.7289631684049995 min 3.01537040366 4.582206681904999 max 3.0460710066599996 5.081537872905 The actual runs:\nNo false sharing False sharing 3.0440456 4.5822066 3.0200773 4.7326414 3.0460710 5.0815378 3.0245974 4.6807162 3.0153704 4.7508973 3.0307415 4.7335685 3.0283079 4.6781897 3.0449196 4.7252849 3.0261973 4.7423249 3.0186892 4.6779495 Hyperthreading adds a twist The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run times are still much worse than the no false sharing case. Hyperthreading also adds more variance, 0.06 vs 0.011 standard deviation.\nOn Linux, you might want to consider using pthread_setaffinity_np to pin threads to physical cores.\nThis is currently not supported on macOS. For the purposes of replicating this benchmark, you can disable hyperthreading by entering safe mode and entering these commands in the terminal:\nnvram boot-args=\"cwae=2\" nvram SMTDisable=%01 After rebooting, System Information (click Apple icon in the menu bar while holding Alt) should report `Hyper-Threading Technology: Disabled\"\nResetting the NVRAM will re-enable hyperthreading.\nCache topology The cache topology on my test machine (with Hyperthreading disabled) is as follows, using lstopo from the hwloc package:\nlstopo - -v --no-io Package L#0 NUMANode L#0 (P#0 local=33554432KB total=33554432KB) L3Cache L#0 (size=16384KB linesize=64) L2Cache L#0 (size=256KB linesize=64) L1dCache L#0 (size=32KB linesize=64) L1iCache L#0 (size=32KB linesize=64) Core L#0 (P#0) PU L#0 (P#0) L2Cache L#1 (size=256KB linesize=64) L1dCache L#1 (size=32KB linesize=64) L1iCache L#1 (size=32KB linesize=64) Core L#1 (P#1) PU L#1 (P#1) L2Cache L#2 (size=256KB linesize=64) L1dCache L#2 (size=32KB linesize=64) L1iCache L#2 (size=32KB linesize=64) Core L#2 (P#2) PU L#2 (P#2) L2Cache L#3 (size=256KB linesize=64) L1dCache L#3 (size=32KB linesize=64) L1iCache L#3 (size=32KB linesize=64) Core L#3 (P#3) PU L#3 (P#3) L2Cache L#4 (size=256KB linesize=64) L1dCache L#4 (size=32KB linesize=64) L1iCache L#4 (size=32KB linesize=64) Core L#4 (P#4) PU L#4 (P#4) L2Cache L#5 (size=256KB linesize=64) L1dCache L#5 (size=32KB linesize=64) L1iCache L#5 (size=32KB linesize=64) Core L#5 (P#5) PU L#5 (P#5) L2Cache L#6 (size=256KB linesize=64) L1dCache L#6 (size=32KB linesize=64) L1iCache L#6 (size=32KB linesize=64) Core L#6 (P#6) PU L#6 (P#6) L2Cache L#7 (size=256KB linesize=64) L1dCache L#7 (size=32KB linesize=64) L1iCache L#7 (size=32KB linesize=64) Core L#7 (P#7) PU L#7 (P#7) ",
   "wordCount" : "1134",
   "inLanguage": "en",
-  "datePublished": "2023-07-09T10:00:00+02:00",
+  "image": "https://cryptocode.github.io/blog/images/mondrian.png","datePublished": "2023-07-09T10:00:00+02:00",
   "dateModified": "2023-07-09T10:00:00+02:00",
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -129,7 +130,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Roger's blog",
+    "name": " Roger's Blog",
     "logo": {
       "@type": "ImageObject",
       "url": "https://cryptocode.github.io/blog/favicon.ico"
@@ -144,7 +145,9 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="Roger&#39;s blog (Alt + H)">Roger&#39;s blog</a>
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title=" Roger&#39;s Blog (Alt + H)">
+                <img src="https://cryptocode.github.io/blog/images/mondrian.png" alt="" aria-label="logo"
+                    height="35"> Roger&#39;s Blog</a>
             <div class="logo-switches">
             </div>
         </div>
@@ -157,7 +160,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 <article class="post-single">
   <header class="post-header">
     
-    <h1 class="post-title">
+    <h1 class="post-title entry-hint-parent">
       Cache Me If You Can
     </h1>
     <div class="post-meta"><span title='2023-07-09 10:00:00 +0200 +0200'>July 9, 2023</span>

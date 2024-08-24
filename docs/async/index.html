@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Async CPU bound workers in Zig | Roger&#39;s blog</title>
+<title>Async CPU bound workers in Zig |  Roger&#39;s Blog</title>
 <meta name="keywords" content="">
 <meta name="description" content="Zig has async/await support, which is typically used for IO bound operations.
 In this article, however, we&rsquo;ll use async/await to simplify writing a simple concurrent worker.
@@ -13,9 +13,7 @@ Goal: use all the cores on the machine to find a randomly selected 64-bit number
 How it works Instead of manually spinning up threads, we&rsquo;re just going to use async/await, along with pub const io_mode = .evented; which informs the standard library to use a non-blocking event loop.">
 <meta name="author" content="">
 <link rel="canonical" href="https://cryptocode.github.io/blog/docs/async/">
-<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.477c66c7b447db15333d0dde413a631316108b717f7eb1a1c64f64374ef55b3d.css" integrity="sha256-R3xmx7RH2xUzPQ3eQTpjExYQi3F/frGhxk9kN071Wz0=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.052097e3fd19b221854fe91635ca1090bc0f4081cdaa8eb8b4f44fd8d9c6b3de.css" integrity="sha256-BSCX4/0ZsiGFT&#43;kWNcoQkLwPQIHNqo64tPRP2NnGs94=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
@@ -37,11 +35,14 @@ In this article, however, we&rsquo;ll use async/await to simplify writing a simp
 Goal: use all the cores on the machine to find a randomly selected 64-bit number whose lower N bits are all cleared.
 How it works Instead of manually spinning up threads, we&rsquo;re just going to use async/await, along with pub const io_mode = .evented; which informs the standard library to use a non-blocking event loop." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://cryptocode.github.io/blog/docs/async/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/async/" />
+<meta property="og:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta property="article:section" content="docs" />
 <meta property="article:published_time" content="2021-05-02T10:00:00+02:00" />
 <meta property="article:modified_time" content="2021-05-02T10:00:00+02:00" />
 
-<meta name="twitter:card" content="summary"/>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
 <meta name="twitter:title" content="Async CPU bound workers in Zig"/>
 <meta name="twitter:description" content="Zig has async/await support, which is typically used for IO bound operations.
 In this article, however, we&rsquo;ll use async/await to simplify writing a simple concurrent worker.
@@ -82,7 +83,7 @@ How it works Instead of manually spinning up threads, we&rsquo;re just going to 
   "articleBody": "Zig has async/await support, which is typically used for IO bound operations.\nIn this article, however, we’ll use async/await to simplify writing a simple concurrent worker.\nGoal: use all the cores on the machine to find a randomly selected 64-bit number whose lower N bits are all cleared.\nHow it works Instead of manually spinning up threads, we’re just going to use async/await, along with pub const io_mode = .evented; which informs the standard library to use a non-blocking event loop. Workers ensure the event loop yields to a worker thread by calling startCpuBoundOperation\nFirst we query the number of logical CPU cores. Then we allocate an array with enough space for an async frame for each core.\nThen we simply call async worker(...) for each CPU and stuff the resulting frame into the array.\nNext, we loop through the frames and await the result, which we print. While this is already simple, #5263 may make it even simpler.\nNow we face a small challenge: when a worker has found the solution, how do we tell the other workers to stop working on the problem?\nEasy enough - we pass a completion token when doing the async call (just a pointer to bool) which the winning worker atomically sets. All workers then check this flag.\nIf the completion token is set, we simply break out of the worker loop.\nI think the end result is quite clean concurrency code (requires a recent master build):\nconst std = @import(\"std\"); pub const io_mode = .evented; pub fn main() !void { var cpu: u64 = try std.Thread.getCpuCount(); // Allocate room for an async frame for every // logical cpu core var promises = try std.heap.page_allocator.alloc(@Frame(worker), cpu); defer std.heap.page_allocator.free(promises); // Start a worker on every cpu var completion_token: bool = false; while (cpu \u003e 0) : (cpu -= 1) { promises[cpu - 1] = async worker(cpu, \u0026completion_token); } std.debug.print(\"Working...\\n\", .{}); // Wait for a worker to find the solution for (promises) |*future| { var result = await future; if (result != 0) { std.debug.print(\"The answer is {x}\\n\", .{result}); } } } fn worker(seed: u64, completion_token: *bool) u64 { // Inform the event loop we're cpu bound. // This effectively puts a worker on every logical core. std.event.Loop.startCpuBoundOperation(); // Seed the random number generator so each worker // look at different numbers var prng = std.rand.DefaultPrng.init(seed); const random = prng.random(); while (true) { var attempt = random.int(u64); // We're looking for a number whose N lower bits // are zero. Feel free to change the constant to // make this take a longer or shorter amount of time. if (attempt \u0026 0xffffff == 0) { // Tell other workers we're done @atomicStore(bool, completion_token, true, std.builtin.AtomicOrder.Release); std.debug.print(\"I found the answer!\\n\", .{}); return attempt; } // Check if another worker has solved it, in which // case we stop working on the problem. if (@atomicLoad(bool, completion_token, std.builtin.AtomicOrder.Acquire)) { std.debug.print(\"Another worker won\\n\", .{}); break; } } return 0; } Run the program and observe all cpu cores get to work using htop or similar (you may have to adjust 0xffffff if it’s too fast or too slow)\nEdit: some clarifications thanks to Protty on Discord\n",
   "wordCount" : "527",
   "inLanguage": "en",
-  "datePublished": "2021-05-02T10:00:00+02:00",
+  "image": "https://cryptocode.github.io/blog/images/mondrian.png","datePublished": "2021-05-02T10:00:00+02:00",
   "dateModified": "2021-05-02T10:00:00+02:00",
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -90,7 +91,7 @@ How it works Instead of manually spinning up threads, we&rsquo;re just going to 
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Roger's blog",
+    "name": " Roger's Blog",
     "logo": {
       "@type": "ImageObject",
       "url": "https://cryptocode.github.io/blog/favicon.ico"
@@ -105,7 +106,9 @@ How it works Instead of manually spinning up threads, we&rsquo;re just going to 
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="Roger&#39;s blog (Alt + H)">Roger&#39;s blog</a>
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title=" Roger&#39;s Blog (Alt + H)">
+                <img src="https://cryptocode.github.io/blog/images/mondrian.png" alt="" aria-label="logo"
+                    height="35"> Roger&#39;s Blog</a>
             <div class="logo-switches">
             </div>
         </div>
@@ -118,7 +121,7 @@ How it works Instead of manually spinning up threads, we&rsquo;re just going to 
 <article class="post-single">
   <header class="post-header">
     
-    <h1 class="post-title">
+    <h1 class="post-title entry-hint-parent">
       Async CPU bound workers in Zig
     </h1>
     <div class="post-meta"><span title='2021-05-02 10:00:00 +0200 +0200'>May 2, 2021</span>

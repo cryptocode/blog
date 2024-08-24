@@ -5,16 +5,14 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Running Zig binaries on a KaiOS device | Roger&#39;s blog</title>
+<title>Running Zig binaries on a KaiOS device |  Roger&#39;s Blog</title>
 <meta name="keywords" content="">
 <meta name="description" content="The goal here is to:
 Cross-compile a Zig program Root a KaiOS device, and then install and run the cross-compiled program on the device We&rsquo;re not making a GUI app or anything here, just a small &ldquo;Hello world&rdquo; program that we&rsquo;ll cross-compile and run on the device. All sorts of interesting things can be done from this point on.
 I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a shell, so you&rsquo;ll have to install that first if you wanna follow along.">
 <meta name="author" content="">
 <link rel="canonical" href="https://cryptocode.github.io/blog/docs/kaios/">
-<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.477c66c7b447db15333d0dde413a631316108b717f7eb1a1c64f64374ef55b3d.css" integrity="sha256-R3xmx7RH2xUzPQ3eQTpjExYQi3F/frGhxk9kN071Wz0=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.052097e3fd19b221854fe91635ca1090bc0f4081cdaa8eb8b4f44fd8d9c6b3de.css" integrity="sha256-BSCX4/0ZsiGFT&#43;kWNcoQkLwPQIHNqo64tPRP2NnGs94=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
@@ -35,11 +33,14 @@ I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a she
 Cross-compile a Zig program Root a KaiOS device, and then install and run the cross-compiled program on the device We&rsquo;re not making a GUI app or anything here, just a small &ldquo;Hello world&rdquo; program that we&rsquo;ll cross-compile and run on the device. All sorts of interesting things can be done from this point on.
 I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a shell, so you&rsquo;ll have to install that first if you wanna follow along." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://cryptocode.github.io/blog/docs/kaios/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/kaios/" />
+<meta property="og:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta property="article:section" content="docs" />
 <meta property="article:published_time" content="2021-01-27T10:00:00+02:00" />
 <meta property="article:modified_time" content="2021-01-27T10:00:00+02:00" />
 
-<meta name="twitter:card" content="summary"/>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
 <meta name="twitter:title" content="Running Zig binaries on a KaiOS device"/>
 <meta name="twitter:description" content="The goal here is to:
 Cross-compile a Zig program Root a KaiOS device, and then install and run the cross-compiled program on the device We&rsquo;re not making a GUI app or anything here, just a small &ldquo;Hello world&rdquo; program that we&rsquo;ll cross-compile and run on the device. All sorts of interesting things can be done from this point on.
@@ -79,7 +80,7 @@ I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a she
   "articleBody": "The goal here is to:\nCross-compile a Zig program Root a KaiOS device, and then install and run the cross-compiled program on the device We’re not making a GUI app or anything here, just a small “Hello world” program that we’ll cross-compile and run on the device. All sorts of interesting things can be done from this point on.\nI’m using Android’s adb to push files to the device and to get a shell, so you’ll have to install that first if you wanna follow along.\nMake a Hello World program in Zig const std = @import(\"std\"); pub fn main() !void { const stdout = std.io.getStdOut().writer(); try stdout.print(\"Hello from Zig!\\n\", .{}); } Save as main.zig\nCross-compile Zig makes it trivial to cross-compile for the ARM Cortex A7:\nzig build-exe -target arm-linux-musleabihf -femit-bin=zigapp main.zig Root the device The recipe here is going to be different for each device type. I’m using a Nokia 2720 Flip for testing, which is easy to root with wallace-light:\nNOTE: I used OmniSD to perform a priviledged reset long before making this post. I’m not sure if it’s necessary or not for Wallace Light to work. If the recipe below doesn’t work, try installing OmniSD and do a reset; it’s easy enough [2].\nPut your KaiOS device in debug mode, typically using *#*#33284#*#* (which spells debug - a bug icon should appear in the status line if it works)\nDeploy Wallace Light [1]\nadb forward tcp:6000 localfilesystem:/data/local/debugger-socket npm i -g @filipe_x3/kdeploy kdeploy -i ~/Downloads/wallace-lite-0.1/application Now start Wallace Light on the device and click ROOT ME.\nNext, I’m pushing the cross-compiled Zig binary to the device’s sdcard:\nadb push zigapp /sdcard Now we need to jump into the device through a shell:\nadb shell We’re now in a terminal session on the device, but most likely on a read-only file system. Let’s fix that:\nmount -o rw,remount /system Next, move the binary from /sdcard to /system/bin and make it executable:\ncp /sdcard/zigapp /system/bin chmod +x /system/bin/zigapp Now we can run it!\n/system/bin/zigapp Result as expected:\nHello from Zig! [1] I used Wallace Light from https://sites.google.com/view/bananahackers/root/temporary-root#h.sb1y1p9fj906\nUnzip it, then unzip the contained application.zip, which is what we’re deploying above.\n[2] https://sites.google.com/view/bananahackers/install-omnisd\n",
   "wordCount" : "363",
   "inLanguage": "en",
-  "datePublished": "2021-01-27T10:00:00+02:00",
+  "image": "https://cryptocode.github.io/blog/images/mondrian.png","datePublished": "2021-01-27T10:00:00+02:00",
   "dateModified": "2021-01-27T10:00:00+02:00",
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -87,7 +88,7 @@ I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a she
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Roger's blog",
+    "name": " Roger's Blog",
     "logo": {
       "@type": "ImageObject",
       "url": "https://cryptocode.github.io/blog/favicon.ico"
@@ -102,7 +103,9 @@ I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a she
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="Roger&#39;s blog (Alt + H)">Roger&#39;s blog</a>
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title=" Roger&#39;s Blog (Alt + H)">
+                <img src="https://cryptocode.github.io/blog/images/mondrian.png" alt="" aria-label="logo"
+                    height="35"> Roger&#39;s Blog</a>
             <div class="logo-switches">
             </div>
         </div>
@@ -115,7 +118,7 @@ I&rsquo;m using Android&rsquo;s adb to push files to the device and to get a she
 <article class="post-single">
   <header class="post-header">
     
-    <h1 class="post-title">
+    <h1 class="post-title entry-hint-parent">
       Running Zig binaries on a KaiOS device
     </h1>
     <div class="post-meta"><span title='2021-01-27 10:00:00 +0200 +0200'>January 27, 2021</span>

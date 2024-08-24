@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>zig on Roger&#39;s blog</title>
+    <title>zig on  Roger&#39;s Blog</title>
     <link>https://cryptocode.github.io/blog/categories/zig/</link>
-    <description>Recent content in zig on Roger&#39;s blog</description>
-    <generator>Hugo -- gohugo.io</generator>
+    <description>Recent content in zig on  Roger&#39;s Blog</description>
+    <image>
+      <title> Roger&#39;s Blog</title>
+      <url>https://cryptocode.github.io/blog/images/mondrian.png</url>
+      <link>https://cryptocode.github.io/blog/images/mondrian.png</link>
+    </image>
+    <generator>Hugo -- 0.115.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate><atom:link href="https://cryptocode.github.io/blog/categories/zig/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate>
+    <atom:link href="https://cryptocode.github.io/blog/categories/zig/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Embedding machine code in Zig instead of using inline assembly</title>
       <link>https://cryptocode.github.io/blog/docs/machinecode/</link>
       <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
-      
       <guid>https://cryptocode.github.io/blog/docs/machinecode/</guid>
       <description>Object files vs. raw machine code Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
 Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in standard libraries Accessing microcontroller features on embedded systems Handwriting a performance-critical hot-path function where the optimizer doesn&amp;rsquo;t do the right thing Inline assembly, however, can quickly get unwieldy, and getting the input/output constraints right can be tricky.</description>
     </item>
-    
     <item>
       <title>Cache Me If You Can</title>
       <link>https://cryptocode.github.io/blog/docs/falsesharing/</link>
       <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
-      
       <guid>https://cryptocode.github.io/blog/docs/falsesharing/</guid>
       <description>&lt;div style=&#34;font-size: small;&#34;&gt;
     &lt;nav id=&#34;TableOfContents&#34;&gt;
@@ -41,6 +44,5 @@ Writing an operating system, which requires direct access to special CPU registe
 &lt;/div&gt;
 &lt;p&gt;How come making a struct in Zig &lt;em&gt;less&lt;/em&gt; densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.&lt;/p&gt;</description>
     </item>
-    
   </channel>
 </rss>

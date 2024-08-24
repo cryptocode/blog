@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>A surprisingly capable RPN calculator in about 100 lines of Zig code | Roger&#39;s blog</title>
+<title>A surprisingly capable RPN calculator in about 100 lines of Zig code |  Roger&#39;s Blog</title>
 <meta name="keywords" content="">
 <meta name="description" content="Summary:
 Reverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let&rsquo;s see if 2 &#43; 2 is still 4:
@@ -13,9 +13,7 @@ Reverse polish notation is awesome Zig is awesome Before solving quadratic equat
 First we input the known values so these get memory slots we can reference, rather than repeating the constants.">
 <meta name="author" content="">
 <link rel="canonical" href="https://cryptocode.github.io/blog/docs/prefix-calculator/">
-<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.477c66c7b447db15333d0dde413a631316108b717f7eb1a1c64f64374ef55b3d.css" integrity="sha256-R3xmx7RH2xUzPQ3eQTpjExYQi3F/frGhxk9kN071Wz0=" rel="preload stylesheet" as="style">
-<script defer crossorigin="anonymous" src="/blog/assets/js/highlight.f413e19d0714851f6474e7ee9632408e58ac146fbdbe62747134bea2fa3415e0.js" integrity="sha256-9BPhnQcUhR9kdOfuljJAjlisFG&#43;9vmJ0cTS&#43;ovo0FeA="
-    onload="hljs.initHighlightingOnLoad();"></script>
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.052097e3fd19b221854fe91635ca1090bc0f4081cdaa8eb8b4f44fd8d9c6b3de.css" integrity="sha256-BSCX4/0ZsiGFT&#43;kWNcoQkLwPQIHNqo64tPRP2NnGs94=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
@@ -37,11 +35,14 @@ Reverse polish notation is awesome Zig is awesome Before solving quadratic equat
 2 2 &#43; M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:
 First we input the known values so these get memory slots we can reference, rather than repeating the constants." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://cryptocode.github.io/blog/docs/prefix-calculator/" /><meta property="article:section" content="docs" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/prefix-calculator/" />
+<meta property="og:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta property="article:section" content="docs" />
 <meta property="article:published_time" content="2021-03-01T10:00:00+02:00" />
 <meta property="article:modified_time" content="2021-03-01T10:00:00+02:00" />
 
-<meta name="twitter:card" content="summary"/>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
 <meta name="twitter:title" content="A surprisingly capable RPN calculator in about 100 lines of Zig code"/>
 <meta name="twitter:description" content="Summary:
 Reverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let&rsquo;s see if 2 &#43; 2 is still 4:
@@ -82,7 +83,7 @@ First we input the known values so these get memory slots we can reference, rath
   "articleBody": "Summary:\nReverse polish notation is awesome Zig is awesome Before solving quadratic equations and diving into code, let’s see if 2 + 2 is still 4:\n2 2 + M0 = 4 Phew! Notice how every answer is placed in the next available memory slot. This will be useful in our next example where we calculate the two solutions to a quadratic equation:\nFirst we input the known values so these get memory slots we can reference, rather than repeating the constants. In the quadratic formula, we thus use M0, M1 and M2 instead of a, b and c.\n$zig run rpn.zig # You can place comments using the hash sign. # Let's solve the quadratic equation where a=5, b=6, c=1 5 M0 = 5 6 M1 = 6 1 M2 = 1 # First solution M1 1 ~ * M1 2 ^ 4 M0 * M2 * - √ + 2 M0 * / M3 = -0.2 # Second solution M1 1 ~ * M1 2 ^ 4 M0 * M2 * - √ - 2 M0 * / M4 = -1 There we have it, the solutions are x = -0.2 and x = -1\nWhy RPN anyway? There’s less to type (because you don’t need parentheses), and some fans claim it leads to fewer mistakes. For this demo, though, the main reason is that implementing an RPN calculator is really simple. You don’t need any parsing beyond trivial tokenizing/converting to numbers, and operator precedence is a non-issue.\nLet’s do one more example, calculating the volume of a sphere. We first put the radius in a memory slot, then we evaluate the formula:\n4.8 M0 = 4.8 4 3 / 𝜋 * M0 3 ^ * M1 = 463.2466863277365 Here’s a nice little tool if you need help converting from infix to RPN.\nSupported operators and functions This is what’s implemented so far. Adding support for more functions and operators is easy - just update the switch statement in the tokenizer loop.\nOp Description * / + - % Basic arithmetic/modulus ^ Exponentiation ~ Negation M… Memory reference, such as M0 sin, cos, tan Trigonometric functions sqrt or √ Square root pi or 𝜋 Push 𝜋 to the stack e Push Euler’s number to the stack avg Pop all numbers from the stack, push the average In addition, you can type mc to clear the memory slots and exit to terminate the calculator.\nThere are 256 slots available, which wraps around if you evaluate more expressions in a session.\nHow does it work? The program sets up a read-eval-print loop (REPL) where it reads expressions, line by line, from standard input.\nEach line is then split on space. Each resulting token is then checked in a switch statement:\nIf it’s a number, push it to the evaluation stack. If it’s a unary operator/function, then the top of the stack is replaced by the value after applying the operator. If it’s a binary operator like multiplication, then two numbers are popped off the stack and replaced by the result. If it’s a memory reference, the corresponding value is pushed to the stack If it’s an empty line or a comment, read the next line. The final result is then stored in the next available memory slot and printed.\nThe code const std = @import(\"std\"); pub fn main() !void { const stdin = std.io.getStdIn().reader(); const stdout = std.io.getStdOut().writer(); try stdout.print(\"Zig RPN Calculator\\nType mc to clear memory slots, exit to quit.\\n\", .{}); var repl: [1024]u8 = undefined; var memslot = [_]f64{0} ** 256; var memslot_index: usize = 0; repl_loop: while (true) { const line = try stdin.readUntilDelimiterOrEof(\u0026repl, '\\n'); var input = std.mem.trimRight(u8, line.?, \"\\r\\n\"); if (std.mem.eql(u8, input, \"\")) { continue; } else if (std.mem.eql(u8, input, \"exit\")) { return; } else if (std.mem.eql(u8, input, \"mc\")) { memslot_index = 0; continue; } var it = std.mem.split(input, \" \"); var stack = [_]f64{0} ** 256; var sp: usize = 0; while (it.next()) |tok| { if (tok.len == 0) { continue :repl_loop; } switch (tok[0]) { '*' =\u003e {stack[sp-2] = stack[sp-2] * stack[sp-1]; sp -= 1;}, '/' =\u003e {stack[sp-2] = stack[sp-2] / stack[sp-1]; sp -= 1;}, '+' =\u003e {stack[sp-2] = stack[sp-2] + stack[sp-1]; sp -= 1;}, '-' =\u003e {stack[sp-2] = stack[sp-2] - stack[sp-1]; sp -= 1;}, '^' =\u003e {stack[sp-2] = std.math.pow(f64, stack[sp-2], stack[sp-1]); sp -= 1;}, '%' =\u003e {stack[sp-2] = try std.math.mod(f64, stack[sp-2], stack[sp-1]); sp -= 1;}, '~' =\u003e {stack[sp-1] = -stack[sp-1];}, '#' =\u003e continue :repl_loop, 'M' =\u003e { const index = std.fmt.parseInt(usize, tok[1..], 10) catch |err| { std.debug.print(\"Invalid memory memory slot index in {s}\\n\", .{tok}); continue :repl_loop; }; stack[sp] = memslot[index % 256]; sp += 1; }, '0'...'9', '.' =\u003e { const num = std.fmt.parseFloat(f64, tok) catch |err| { std.debug.print(\"Invalid character in floating point number {s}\\n\", .{tok}); continue :repl_loop; }; stack[sp] = num; sp += 1; }, else =\u003e { if (std.mem.eql(u8, tok, \"sin\")) { stack[sp-1] = std.math.sin(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"cos\")) { stack[sp-1] = std.math.cos(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"tan\")) { stack[sp-1] = std.math.tan(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"sqrt\") or std.mem.eql(u8, tok, \"√\")) { stack[sp-1] = std.math.sqrt(stack[sp-1]); } else if (std.mem.eql(u8, tok, \"pi\") or std.mem.eql(u8, tok, \"𝜋\")) { stack[sp] = std.math.pi; sp += 1; } else if (std.mem.eql(u8, tok, \"e\")) { stack[sp] = std.math.e; sp += 1; } else if (std.mem.eql(u8, tok, \"avg\")) { const count = sp; var sum: f64 = 0; for (stack) |val| { sum += val; } sp-=count; stack[sp] = sum / @intToFloat(f64, count); sp+=1; } else { try stdout.print(\"Invalid operation {s}\\n\", .{tok}); continue :repl_loop; } }, } } memslot[memslot_index % 256] = stack[sp-1]; try stdout.print(\"M{d} = {d}\\n\", .{memslot_index % 256, stack[sp-1]}); memslot_index += 1; } } ",
   "wordCount" : "942",
   "inLanguage": "en",
-  "datePublished": "2021-03-01T10:00:00+02:00",
+  "image": "https://cryptocode.github.io/blog/images/mondrian.png","datePublished": "2021-03-01T10:00:00+02:00",
   "dateModified": "2021-03-01T10:00:00+02:00",
   "mainEntityOfPage": {
     "@type": "WebPage",
@@ -90,7 +91,7 @@ First we input the known values so these get memory slots we can reference, rath
   },
   "publisher": {
     "@type": "Organization",
-    "name": "Roger's blog",
+    "name": " Roger's Blog",
     "logo": {
       "@type": "ImageObject",
       "url": "https://cryptocode.github.io/blog/favicon.ico"
@@ -105,7 +106,9 @@ First we input the known values so these get memory slots we can reference, rath
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="https://cryptocode.github.io/blog/" accesskey="h" title="Roger&#39;s blog (Alt + H)">Roger&#39;s blog</a>
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title=" Roger&#39;s Blog (Alt + H)">
+                <img src="https://cryptocode.github.io/blog/images/mondrian.png" alt="" aria-label="logo"
+                    height="35"> Roger&#39;s Blog</a>
             <div class="logo-switches">
             </div>
         </div>
@@ -118,7 +121,7 @@ First we input the known values so these get memory slots we can reference, rath
 <article class="post-single">
   <header class="post-header">
     
-    <h1 class="post-title">
+    <h1 class="post-title entry-hint-parent">
       A surprisingly capable RPN calculator in about 100 lines of Zig code
     </h1>
     <div class="post-meta"><span title='2021-03-01 10:00:00 +0200 +0200'>March 1, 2021</span>
