@@ -24,6 +24,10 @@ images = ["images/mondrian.png"]
     name="x"
     url="https://x.com/0xcafec0der"
 
+  [Params.socialIcons.mastodon]
+    name="mastodon"
+    url="https://mastodon.social/@cryptocod3"
+
 [markup]
   [markup.tableOfContents]
     endLevel = 3
