@@ -12,6 +12,18 @@ images = ["images/mondrian.png"]
   icon = "images/mondrian.png"
   iconHeight = 35
 
+[Params.homeInfoParams]
+  title="Welcome!"
+  content="Feel free to reach out to me on Discord (@cryptocode), IRC on Libera Chat (@cryptocode) or email me at cryptocode@zolo.io."
+
+[Params.socialIcons]
+  [Params.socialIcons.github]
+    name="github"
+    url="https://github.com/cryptocode"
+  [Params.socialIcons.x]
+    name="x"
+    url="https://x.com/0xcafec0der"
+
 [markup]
   [markup.tableOfContents]
     endLevel = 3
