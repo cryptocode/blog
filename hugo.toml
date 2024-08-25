@@ -32,7 +32,7 @@ images = ["images/mondrian.png"]
 
   [Params.socialIcons.rss]
     name="rss"
-    url="https://https://cryptocode.github.io/blog/index.xml"
+    url="https://cryptocode.github.io/blog/index.xml"
 
 [markup]
   [markup.tableOfContents]
