@@ -17,9 +17,11 @@ images = ["images/mondrian.png"]
   content="Feel free to reach out to me on Discord (@cryptocode), IRC on Libera Chat (@cryptocode) or email me at cryptocode@zolo.io."
 
 [Params.socialIcons]
+
   [Params.socialIcons.github]
     name="github"
     url="https://github.com/cryptocode"
+
   [Params.socialIcons.x]
     name="x"
     url="https://x.com/0xcafec0der"
@@ -27,6 +29,10 @@ images = ["images/mondrian.png"]
   [Params.socialIcons.mastodon]
     name="mastodon"
     url="https://mastodon.social/@cryptocod3"
+
+  [Params.socialIcons.rss]
+    name="rss"
+    url="https://https://cryptocode.github.io/blog/index.xml"
 
 [markup]
   [markup.tableOfContents]
