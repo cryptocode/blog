@@ -13,8 +13,8 @@ images = ["images/mondrian.png"]
   iconHeight = 35
 
 [Params.homeInfoParams]
-  title="Welcome!"
-  content="Feel free to reach out to me on Discord (@cryptocode), IRC on Libera Chat (@cryptocode) or email me at cryptocode@zolo.io"
+  # title="Welcome!"
+  content="Welcome to my little blog! Feel free to reach out to me @cryptocode on Discord or Libera IRC"
 
 [Params.socialIcons]
 
