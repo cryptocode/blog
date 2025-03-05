@@ -21,11 +21,11 @@ In this post, we'll explore an alternative: write the assembly in separate files
 
 The code is tested on **macOS**, but should work with minor modifications on Linux (primarily the syscall number)
 
-### Object files vs. raw machine code
+## Object files vs. raw machine code
 
 Why not simply generate object files from the assembler and link it with the Zig code? That's likely the better option in most cases. However, in free-standing and embedded environments, you might not want the overhead and relocation complexity. Embedding machine code has very niche use cases, but, hey, it's fun and still useful to know, and it's an excuse to look into efficient use of ABI calling conventions.
 
-### Assembling
+## Assembling
 
 We'll be using NASM to assemble the code, which allows us to emit raw machine code without any additional metadata.
 
@@ -83,7 +83,7 @@ That's 7 bytes of machine code to add two numbers:
 c3: ret
 ```
 
-### Calling from Zig
+## Calling from Zig
 
 Next, we'll call the _add_ function from Zig.
 
@@ -145,7 +145,7 @@ call    rax
 
 The first line puts the pointer to the _add_ function into `rax`. The next two lines put the arguments into `edi` and `esi`, and the last line calls the function that was loaded into `rax`. Note that edi/esi are the 32-bit lower halves of rdi/rsi - the upper halves are zeroed out, and thus reading rdi/rsi will work as expected in the _add_ implementation.
 
-### A larger example with fast memcpy and syscalls
+## A larger example with fast memcpy and syscalls
 
 Here's an expanded version of the example, with two more functions: an AVX based memcpy, and an example of using syscalls to print a string to stdout.
 

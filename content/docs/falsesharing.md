@@ -12,7 +12,7 @@ How come making a struct in Zig _less_ densely packed can give a 56% performance
 <!--more-->
 While packing data closely together can be very beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.
 
-### Cache lines
+## Cache lines
 False sharing occurs when the data layout is at odds with the memory access pattern, namely threads updating thread-specific data that happens to fall on the same _cache line_.
 
 Imagine we're writing a multi-threaded queue. To avoid false sharing, we must to go from this situation:
@@ -32,7 +32,7 @@ A cache line is the smallest unit of transfer between each core's local Lx cache
 Cache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. The actual impact depends on a thread's affinity to core socket and hyperthreads, scheduling, and the number of threads. Memory access not involving false sharing may also be affected due to intra-socket coherence traffic saturation.
 
 A cache line is typically 64 bytes, but this varies between CPU architectures. Tools such as `lstopo` are useful to determine the cache hierachy and line size on your CPU.
-### A little Zig surprise
+## A little Zig surprise
 
 Take a look at this struct:
 
@@ -56,14 +56,14 @@ const Queue = extern struct  {
 };
 ```
 
-The difference? The `extern` keyword. This tells the compiler to adhere to the C ABI, which means the compiler will _not_ reorder the fields.
+The difference? The extern keyword. This tells the compiler to adhere to the C ABI, which means the compiler will _not_ reorder the fields.
 
-_Note that we can not use a_ `packed struct` _in this example as the padding type is not supported. In Zig, packed structs are just fancy integers_
+_Note that we can not use a packed struct in this example as the padding type is not supported. In Zig, packed structs are just fancy integers_
 
 For regular structs, Zig is free to reorder the fields to _minimize padding_, which is a good thing in general.
 
 However, by enforcing the specified order, the `padding` field fulfills its intended purpose: It places `head_index` and `tail_index` on separate cache lines.
-### The code
+## The code
 
 The benchmark is designed to demonstrate the issue at hand, and the results are not necessarily representative of false sharing slowdowns in a real-world application. That said, if false sharing occurs in a hot path, the impact can be significant.
 
@@ -108,7 +108,7 @@ hyperfine --export-json results-with-extern.json ./falsesharing
 ```
 
 Do the same without the `extern` keyword (rename the json output filename in the hyperfine command), and observe the difference.
-### The numbers
+## The numbers
 
 The following tables contain the benchmark summary, 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur. 
 
@@ -141,7 +141,7 @@ The actual runs:
 | 3.0261973 | 4.7423249 |
 | 3.0186892 | 4.6779495 |
 
-### Hyperthreading adds a twist
+## Hyperthreading adds a twist
 
 The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run times are still much worse than the no false sharing case. Hyperthreading also adds more variance, 0.06 vs 0.011 standard deviation.
 
@@ -158,7 +158,7 @@ After rebooting, System Information (click Apple icon in the menu bar while hold
 
 Resetting the NVRAM will re-enable hyperthreading.
 
-### Cache topology
+## Cache topology
 
 The cache topology on my test machine (with Hyperthreading disabled) is as follows, using `lstopo` from the `hwloc` package:
 
