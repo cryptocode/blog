@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>asm on  Roger&#39;s Blog</title>
+    <title>asm on  ~/cryptocode</title>
     <link>https://cryptocode.github.io/blog/categories/asm/</link>
-    <description>Recent content in asm on  Roger&#39;s Blog</description>
+    <description>Recent content in asm on  ~/cryptocode</description>
     <image>
-      <title> Roger&#39;s Blog</title>
+      <title> ~/cryptocode</title>
       <url>https://cryptocode.github.io/blog/images/mondrian.png</url>
       <link>https://cryptocode.github.io/blog/images/mondrian.png</link>
     </image>
