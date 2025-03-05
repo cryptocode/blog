@@ -10,16 +10,12 @@
 <meta name="description" content="
     
   
-    
-      
-        Cache lines
-        A little Zig surprise
-        The code
-        The numbers
-        Hyperthreading adds a twist
-        Cache topology
-      
-    
+    Cache lines
+    A little Zig surprise
+    The code
+    The numbers
+    Hyperthreading adds a twist
+    Cache topology
   
 
 
@@ -46,16 +42,12 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 <meta property="og:description" content="
     
   
-    
-      
-        Cache lines
-        A little Zig surprise
-        The code
-        The numbers
-        Hyperthreading adds a twist
-        Cache topology
-      
-    
+    Cache lines
+    A little Zig surprise
+    The code
+    The numbers
+    Hyperthreading adds a twist
+    Cache topology
   
 
 
@@ -73,16 +65,12 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 <meta name="twitter:description" content="
     
   
-    
-      
-        Cache lines
-        A little Zig surprise
-        The code
-        The numbers
-        Hyperthreading adds a twist
-        Cache topology
-      
-    
+    Cache lines
+    A little Zig surprise
+    The code
+    The numbers
+    Hyperthreading adds a twist
+    Cache topology
   
 
 
@@ -196,22 +184,18 @@ How come making a struct in Zig less densely packed can give a 56% performance i
   <div class="post-content"><div style="font-size: small;">
     <nav id="TableOfContents">
   <ul>
-    <li>
-      <ul>
-        <li><a href="#cache-lines">Cache lines</a></li>
-        <li><a href="#a-little-zig-surprise">A little Zig surprise</a></li>
-        <li><a href="#the-code">The code</a></li>
-        <li><a href="#the-numbers">The numbers</a></li>
-        <li><a href="#hyperthreading-adds-a-twist">Hyperthreading adds a twist</a></li>
-        <li><a href="#cache-topology">Cache topology</a></li>
-      </ul>
-    </li>
+    <li><a href="#cache-lines">Cache lines</a></li>
+    <li><a href="#a-little-zig-surprise">A little Zig surprise</a></li>
+    <li><a href="#the-code">The code</a></li>
+    <li><a href="#the-numbers">The numbers</a></li>
+    <li><a href="#hyperthreading-adds-a-twist">Hyperthreading adds a twist</a></li>
+    <li><a href="#cache-topology">Cache topology</a></li>
   </ul>
 </nav>
 </div>
 <p>How come making a struct in Zig <em>less</em> densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.</p>
 <p>While packing data closely together can be very beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.</p>
-<h3 id="cache-lines">Cache lines<a hidden class="anchor" aria-hidden="true" href="#cache-lines">#</a></h3>
+<h2 id="cache-lines">Cache lines<a hidden class="anchor" aria-hidden="true" href="#cache-lines">#</a></h2>
 <p>False sharing occurs when the data layout is at odds with the memory access pattern, namely threads updating thread-specific data that happens to fall on the same <em>cache line</em>.</p>
 <p>Imagine we&rsquo;re writing a multi-threaded queue. To avoid false sharing, we must to go from this situation:</p>
 <p><img loading="lazy" src="/blog/images/false-sharing-bad.png" alt="Cachelines"  />
@@ -224,7 +208,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 <p>A cache line is the smallest unit of transfer between each core&rsquo;s local Lx caches and shared main memory, and thus also the unit of synchronization of coherence protocols such as MESI. Updating a cache line on one core will invalidate the corresponding line on all other cores&rsquo; local caches.</p>
 <p>Cache line invalidation is very expensive, and may additionally cause issues for applications that are sensitive to performance variability. The actual impact depends on a thread&rsquo;s affinity to core socket and hyperthreads, scheduling, and the number of threads. Memory access not involving false sharing may also be affected due to intra-socket coherence traffic saturation.</p>
 <p>A cache line is typically 64 bytes, but this varies between CPU architectures. Tools such as <code>lstopo</code> are useful to determine the cache hierachy and line size on your CPU.</p>
-<h3 id="a-little-zig-surprise">A little Zig surprise<a hidden class="anchor" aria-hidden="true" href="#a-little-zig-surprise">#</a></h3>
+<h2 id="a-little-zig-surprise">A little Zig surprise<a hidden class="anchor" aria-hidden="true" href="#a-little-zig-surprise">#</a></h2>
 <p>Take a look at this struct:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> Queue <span style="color:#f92672">=</span> <span style="color:#66d9ef">struct</span>  {
 </span></span><span style="display:flex;"><span>    head_index<span style="color:#f92672">:</span> <span style="color:#66d9ef">u64</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
@@ -238,11 +222,11 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 </span></span><span style="display:flex;"><span>    padding<span style="color:#f92672">:</span> [<span style="color:#ae81ff">64</span>]<span style="color:#66d9ef">u8</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">undefined</span>,
 </span></span><span style="display:flex;"><span>    tail_index<span style="color:#f92672">:</span> <span style="color:#66d9ef">u64</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
 </span></span><span style="display:flex;"><span>};
-</span></span></code></pre></div><p>The difference? The <code>extern</code> keyword. This tells the compiler to adhere to the C ABI, which means the compiler will <em>not</em> reorder the fields.</p>
-<p><em>Note that we can not use a</em> <code>packed struct</code> <em>in this example as the padding type is not supported. In Zig, packed structs are just fancy integers</em></p>
+</span></span></code></pre></div><p>The difference? The extern keyword. This tells the compiler to adhere to the C ABI, which means the compiler will <em>not</em> reorder the fields.</p>
+<p><em>Note that we can not use a packed struct in this example as the padding type is not supported. In Zig, packed structs are just fancy integers</em></p>
 <p>For regular structs, Zig is free to reorder the fields to <em>minimize padding</em>, which is a good thing in general.</p>
 <p>However, by enforcing the specified order, the <code>padding</code> field fulfills its intended purpose: It places <code>head_index</code> and <code>tail_index</code> on separate cache lines.</p>
-<h3 id="the-code">The code<a hidden class="anchor" aria-hidden="true" href="#the-code">#</a></h3>
+<h2 id="the-code">The code<a hidden class="anchor" aria-hidden="true" href="#the-code">#</a></h2>
 <p>The benchmark is designed to demonstrate the issue at hand, and the results are not necessarily representative of false sharing slowdowns in a real-world application. That said, if false sharing occurs in a hot path, the impact can be significant.</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> std <span style="color:#f92672">=</span> @import(<span style="color:#e6db74">&#34;std&#34;</span>);
 </span></span><span style="display:flex;"><span>
@@ -278,7 +262,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>zig build-exe -OReleaseFast falsesharing.zig
 </span></span><span style="display:flex;"><span>hyperfine --export-json results-with-extern.json ./falsesharing   
 </span></span></code></pre></div><p>Do the same without the <code>extern</code> keyword (rename the json output filename in the hyperfine command), and observe the difference.</p>
-<h3 id="the-numbers">The numbers<a hidden class="anchor" aria-hidden="true" href="#the-numbers">#</a></h3>
+<h2 id="the-numbers">The numbers<a hidden class="anchor" aria-hidden="true" href="#the-numbers">#</a></h2>
 <p>The following tables contain the benchmark summary, 10 timings for the case where false sharing does not occur, and 10 timings for the case where false sharing does occur.</p>
 <p>While a larger number of samples were taken to verify the effect, the numbers below are representative for the findings.</p>
 <p>Not only is the average time for the false sharing case significantly worse, the standard deviation is also an order of magnitude higher.</p>
@@ -370,7 +354,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 </tr>
 </tbody>
 </table>
-<h3 id="hyperthreading-adds-a-twist">Hyperthreading adds a twist<a hidden class="anchor" aria-hidden="true" href="#hyperthreading-adds-a-twist">#</a></h3>
+<h2 id="hyperthreading-adds-a-twist">Hyperthreading adds a twist<a hidden class="anchor" aria-hidden="true" href="#hyperthreading-adds-a-twist">#</a></h2>
 <p>The timings above are with hyperthreading disabled. With hyperthreading enabled, the penalty for the false sharing case is sometimes less severe (depending on affinity), but average run times are still much worse than the no false sharing case. Hyperthreading also adds more variance, 0.06 vs 0.011 standard deviation.</p>
 <p>On Linux, you might want to consider using <code>pthread_setaffinity_np</code> to pin threads to physical cores.</p>
 <p>This is currently not supported on macOS. For the purposes of replicating this benchmark, you can disable hyperthreading by entering safe mode and entering these commands in the terminal:</p>
@@ -378,7 +362,7 @@ How come making a struct in Zig less densely packed can give a 56% performance i
 </span></span><span style="display:flex;"><span>nvram SMTDisable<span style="color:#f92672">=</span>%01
 </span></span></code></pre></div><p>After rebooting, System Information (click Apple icon in the menu bar while holding Alt) should report `Hyper-Threading Technology: Disabled&quot;</p>
 <p>Resetting the NVRAM will re-enable hyperthreading.</p>
-<h3 id="cache-topology">Cache topology<a hidden class="anchor" aria-hidden="true" href="#cache-topology">#</a></h3>
+<h2 id="cache-topology">Cache topology<a hidden class="anchor" aria-hidden="true" href="#cache-topology">#</a></h2>
 <p>The cache topology on my test machine (with Hyperthreading disabled) is as follows, using <code>lstopo</code> from the <code>hwloc</code> package:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>lstopo - -v --no-io
 </span></span><span style="display:flex;"><span>
