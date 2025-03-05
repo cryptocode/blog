@@ -29,7 +29,7 @@ Save as `main.zig`
 ## Cross-compile 
 Zig makes it trivial to cross-compile for the ARM Cortex A7:
 
-```
+```bash
 zig build-exe -target arm-linux-musleabihf -femit-bin=zigapp main.zig
 ```
 
@@ -42,7 +42,7 @@ The recipe here is going to be different for each device type. I'm using a Nokia
 
 2. Deploy Wallace Light [1]
 
-```
+```bash
 adb forward tcp:6000 localfilesystem:/data/local/debugger-socket
 npm i -g @filipe_x3/kdeploy
 kdeploy -i ~/Downloads/wallace-lite-0.1/application
@@ -53,40 +53,40 @@ Now start Wallace Light on the device and click ROOT ME.
 
 Next, I'm pushing the cross-compiled Zig binary to the device's sdcard:
 
-```
+```bash
 adb push zigapp /sdcard
 
 ```
 
 Now we need to jump into the device through a shell:
 
-```
+```bash
 adb shell
 ```
 
 We're now in a terminal session on the device, but most likely on a read-only file system. Let's fix that:
 
-```
+```bash
 mount -o rw,remount /system
 ```
 
 Next, move the binary from `/sdcard` to `/system/bin` and make it executable:
 
 
-```
+```bash
 cp /sdcard/zigapp /system/bin
 chmod +x /system/bin/zigapp
 ```
 
 Now we can run it!
 
-```
+```bash
 /system/bin/zigapp
 ```
 
 Result as expected:
 
-```
+```bash
 Hello from Zig!
 ```
 

@@ -1,16 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Qwitcher+Grypen:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Marcellus&amp;display=swap')
 
 .qwitcher-grypen-bold {
-  font-family: "Qwitcher Grypen", cursive, 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  /* font-family: "Gentium Plus"; , "Qwitcher Grypen", cursive, 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; */
+  font-family: "Gentium Plus";
   font-weight: 700;
   font-style: normal;
 }
 
 main {
     --main-width: 1024px;
-    font-size: 16px;
+    font-size: 18px;
+    font-family: Gentium Plus;
+    font-style: normal;
 }
-
+body {
+    
+    background-color: #FAF9F6;
+    /* font-size: 18px; */
+    /* font-family: Gentium Plus; */
+    /* font-style: normal; */
+}
 body #moon {
     vertical-align: middle;
     display: none;
@@ -18,6 +28,10 @@ body #moon {
 
 body #sun {
     display: none;
+}
+
+body #TableOfContents {
+    font-size: 16px;
 }
 
 .main h1 {
@@ -30,20 +44,27 @@ body #sun {
 }
 
 .main h3 {
-    font-size: 16px;
+    font-size: 22px;
 }
 
 tbody {
-    font-size: 13px;
+    font-size: 14px;
+}
+
+.entry-content {
+    font-size: 16px;
+}
+div.highlight {
+  filter: invert(1) hue-rotate(180deg);
 }
 
 .logo a {
-    font-family: "Qwitcher Grypen", cursive, 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: "Gentium Plus"; /*, "Qwitcher Grypen", cursive, 'Courier New', 'Copperplate', 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;*/
     font-weight: 700;
     font-style: normal;
 
-    font-size: 40px;
+    font-size: 30px;
 
-    --color: var(--primary);
-    color: #fffff0;
+    /* --color: var(--primary); */
+    /* color: #fffff0; */
 }

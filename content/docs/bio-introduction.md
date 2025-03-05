@@ -136,7 +136,7 @@ You can now use Bio in two ways:
 
 There are some examples you play around with, like this one that prints a Sierpinksi triangle. You can change the size by editing the source file.
 
-```
+```bash
 ./bio run examples/triangles.lisp
 
                ^
@@ -340,24 +340,6 @@ For Bio to support recursion well, we have to implement tail call optimization, 
 The solution is conceptually simple: the body of `eval` in Zig is a loop. When `eval` evaluates, say, `if`, then the selected branch will become the next expression to evaluate. In the case of lambdas, the last expression becomes the next expression in the eval loop, and in this case we also have to change the loop's current environment to the lambda environment. The same is true for environment expressions, such as `(pos (update 3 4))`
 
 I think the easiest way to see how this works is to fire up `zig run bio.zig` in a debugger, then step through `eval` after pasting a minimal recursive Bio function in the REPL.
-
-
-## VSCode configuration
-- Install a Lisp syntax plugin
-- Add a run task for the currently open lisp file in `tasks.json`:
-
-```
-{
-    "label": "bio run",
-    "type": "shell",
-    "command": "${workspaceFolder}/bio run ${file}",
-    "problemMatcher": [],
-    "group": {
-        "kind": "build",
-        "isDefault": true
-    }
-},
-```
 
 ## Reading list
 1. http://jmc.stanford.edu/articles/lisp/lisp.pdf

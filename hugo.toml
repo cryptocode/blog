@@ -1,11 +1,11 @@
 baseURL = 'https://cryptocode.github.io/blog/'
 languageCode = 'en-us'
-title = " Roger's Blog"
+title = " ~/cryptocode"
 theme = 'PaperMod'
 
 [Params]
-defaultTheme = 'dark'
-disableThemeToggle = true
+defaultTheme = 'light'
+# disableThemeToggle = false
 images = ["images/mondrian.png"]
 
 [Params.label]
@@ -14,7 +14,7 @@ images = ["images/mondrian.png"]
 
 [Params.homeInfoParams]
   title="Welcome!"
-  content="Feel free to reach out to me on Discord (@cryptocode), IRC on Libera Chat (@cryptocode) or email me at cryptocode@zolo.io."
+  content="Feel free to reach out to me on Discord (@cryptocode), IRC on Libera Chat (@cryptocode) or email me at cryptocode@zolo.io"
 
 [Params.socialIcons]
 
