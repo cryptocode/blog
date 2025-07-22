@@ -11,8 +11,17 @@
     </image>
     <generator>Hugo -- 0.115.1</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate>
+    <lastBuildDate>Tue, 22 Jul 2025 20:32:37 +0200</lastBuildDate>
     <atom:link href="https://cryptocode.github.io/blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Zig asserts are not C asserts</title>
+      <link>https://cryptocode.github.io/blog/docs/assert/</link>
+      <pubDate>Tue, 22 Jul 2025 20:32:37 +0200</pubDate>
+      <guid>https://cryptocode.github.io/blog/docs/assert/</guid>
+      <description>Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.
+I did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:
+pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q.</description>
+    </item>
     <item>
       <title>Embedding machine code in Zig instead of using inline assembly</title>
       <link>https://cryptocode.github.io/blog/docs/machinecode/</link>

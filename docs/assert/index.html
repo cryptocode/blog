@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Zig asserts are not C asserts |  ~/cryptocode</title>
+<meta name="keywords" content="">
+<meta name="description" content="Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.
+I did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:
+pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q.">
+<meta name="author" content="">
+<link rel="canonical" href="https://cryptocode.github.io/blog/docs/assert/">
+<link crossorigin="anonymous" href="/blog/assets/css/stylesheet.31670b680bf0c33daf591b5847a304d489f83cb2bc3d2971d5f25009e51af4ca.css" integrity="sha256-MWcLaAvwwz2vWRtYR6ME1In4PLK8PSlx1fJQCeUa9Mo=" rel="preload stylesheet" as="style"><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gentium+Plus:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="icon" href="https://cryptocode.github.io/blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://cryptocode.github.io/blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://cryptocode.github.io/blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://cryptocode.github.io/blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://cryptocode.github.io/blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Zig asserts are not C asserts" />
+<meta property="og:description" content="Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.
+I did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:
+pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://cryptocode.github.io/blog/docs/assert/" />
+<meta property="og:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta property="article:section" content="docs" />
+<meta property="article:published_time" content="2025-07-22T20:32:37+02:00" />
+<meta property="article:modified_time" content="2025-07-22T20:32:37+02:00" />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="https://cryptocode.github.io/blog/images/mondrian.png" />
+<meta name="twitter:title" content="Zig asserts are not C asserts"/>
+<meta name="twitter:description" content="Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.
+I did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:
+pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q."/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Docs",
+      "item": "https://cryptocode.github.io/blog/docs/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Zig asserts are not C asserts",
+      "item": "https://cryptocode.github.io/blog/docs/assert/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Zig asserts are not C asserts",
+  "name": "Zig asserts are not C asserts",
+  "description": "Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.\nI did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:\npub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, \u0026amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q.",
+  "keywords": [
+    
+  ],
+  "articleBody": "Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.\nI did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:\npub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, \u0026.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q.get(io, \u0026buf, 1) == 1); return buf[0]; } Which prompted my question:\nJust a quick side quest: Doesn’t the assert here risk put and get calls being optimized away? If not I think I might have misunderstood std.debug.assert’s doc comment and could use some education.\nSince assert is a regular function, the argument is evaluated (and is indeed in debug/safe builds), but since the expression is assumed to be true (otherwise unreachable) it seems like the whole expression is allowed to be removed\nIs there a difference whether the expression is fallible or not, or is deemed to have side effects?\nThe nice thing about Ziggit is that core team members frequently chimes in with their expertise, and that was the case here as well. So I figured I’d try to summarize my understanding of everything based on those posts. Mostly for myself since I have streches where I have to code in lesser languages and might need a reminder on this - hopefully someone else finds it useful too.\nBack to the question.\nThe short answer is: no, the put and get calls do most definitely not get optimized away. We’ll see why in a bit.\nstd.debug.assert and unreachable If you’ve ever hit an assertion in Zig, you have also looked at the implementation of std.debug.assert since it appears in the panic trace:\nthread 33583038 panic: reached unreachable code lib/std/debug.zig:550:14: 0x10495bc93 in assert (sideeffects) if (!ok) unreachable; // assertion failure` That’s all assert does: if (!ok) unreachable;\nIf unreachable is hit in safe modes, then… well, you’ve seen the panic trace. Very helpful.\nIn optimizing modes, unreachable becomes a promise that control flow will not reach this point at all. Also very helpful: faster code!\nNow, here’s the doc comment on assert that probably helped people get confused, despite the comment being 100% verifiably correct:\nIn ReleaseFast and ReleaseSmall modes, calls to this function are optimized away, and in fact the optimizer is able to use the assertion in its heuristics.\nOn closer inspection, it turns out that this is just what the documentation of unreachable promised us. No more, no less.\nThis is very different from C’s assert which is a macro that nukes the entire contents through preprocessor directives. It’s a similar story in many other languages. They have special constructs for asserts. Zig does not.\nstd.debug.assert is a plain old function, no special treatment is going on. The argument may or may not get optimized away. The idea that if (!ok) unreachable; somehow magically wires up the optimizer to always delete “the whole thing” is wrong.\nDoes that mean asserts can be expensive even in ReleaseFast mode? Yes, because while the call to assert is gone, the LLVM optimizer that’s supposed elide dead code isn’t always able to do so. Bugs, limitations and side effects. The expensive check you passed as an argument may remain. Simple expressions like arr.len \u003e 0 will almost certainly be nuked, but it’s less clear for anything non-trivial. The Zig optimizer pipelines can’t come soon enough.\nAnyway, I wanted to check all this during the Ziggit discussion and the very first example I came up with turned out to not be optimized away.\nHere’s an improved version of my repro, thanks to TibboddiT on Ziggit:\nconst std = @import(\"std\"); fn check(val: []u8) bool { var sum: usize = 0; for (0..val.len * 500_000_000) |v| { sum += val[v % val.len]; } return sum == 6874500000000; } pub fn main() void { // Get a consistent runtime-only-known value var prng: std.Random.DefaultPrng = .init(12); const rand = prng.random(); var buf: [100]u8 = undefined; rand.bytes(\u0026buf); std.debug.assert(check(\u0026buf)); } Compile and run this under ReleaseFast on Zig 14.x and you’ll see that the program is busy for a good while. The core team believes this is a missed optimization in LLVM.\nIf profiling shows that an assertion is expensive, or you’re just not confident it will be fully elided, you can do something like this:\nif (std.debug.runtime_safety) std.debug.assert(check(\u0026buf));\n…or check against build modes when that makes more sense.\nSide effects Now let’s go back to the original question, which is about the opposite of trying to get rid of dead code. We want to keep code.\nWe were told that assert(try q.put(io, \u0026.{item}, 1) == 1); is completely safe. There is no way that the optimizer will make the put call be elided, despite being inside an assert. The code is thus correct even under ReleaseFast.\nZig has a clearly defined list of side effects that prevent the elision from happening. Andrew Kelley shared this:\nExamples of Not side effects:\ncalling a function loading from memory storing to memory inline assembly atomics unreachable in unsafe optimization modes everything not in the following list Complete, exhaustive list of all side effects:\nloading through a volatile pointer storing through a volatile pointer inline assembly with volatile keyword atomics with volatile pointers calling an extern function @panic, @trap, @breakpoint unreachable in safe optimization modes (equivalent to @panic) A mutex qualifies as a side effect, the put implementation uses a mutex, thus put is not a candidate for elision.\nIf the put implementation was simpler and just updated memory somewhere, then it looks to me, given the list above, that the call may be elided, but I have not verified that.\nSo keep assertions in mind when refactoring. You don’t want removal of side effects to turn into correctness issues.\n",
+  "wordCount" : "974",
+  "inLanguage": "en",
+  "image": "https://cryptocode.github.io/blog/images/mondrian.png","datePublished": "2025-07-22T20:32:37+02:00",
+  "dateModified": "2025-07-22T20:32:37+02:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://cryptocode.github.io/blog/docs/assert/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": " ~/cryptocode",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://cryptocode.github.io/blog/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://cryptocode.github.io/blog/" accesskey="h" title=" ~/cryptocode (Alt + H)">
+                <img src="https://cryptocode.github.io/blog/images/mondrian.png" alt="" aria-label="logo"
+                    height="35"> ~/cryptocode</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      Zig asserts are not C asserts
+    </h1>
+    <div class="post-meta"><span title='2025-07-22 20:32:37 +0200 +0200'>July 22, 2025</span>
+
+</div>
+  </header> 
+  <div class="post-content"><p>Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.</p>
+<p>I did just that in a Ziggit post that was completely unrelated to assertions, which linked
+to some code that gave me pause:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> putOne(q<span style="color:#f92672">:</span> <span style="color:#f92672">*</span>@This(), io<span style="color:#f92672">:</span> Io, item<span style="color:#f92672">:</span> Elem) Cancelable<span style="color:#f92672">!</span><span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    assert(<span style="color:#66d9ef">try</span> q.put(io, <span style="color:#f92672">&amp;</span>.{item}, <span style="color:#ae81ff">1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> getOne(q<span style="color:#f92672">:</span> <span style="color:#f92672">*</span>@This(), io<span style="color:#f92672">:</span> Io) Cancelable<span style="color:#f92672">!</span>Elem {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> buf<span style="color:#f92672">:</span> [<span style="color:#ae81ff">1</span>]Elem <span style="color:#f92672">=</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>    assert(<span style="color:#66d9ef">try</span> q.get(io, <span style="color:#f92672">&amp;</span>buf, <span style="color:#ae81ff">1</span>) <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> buf[<span style="color:#ae81ff">0</span>];
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Which prompted my question:</p>
+<blockquote>
+<p>Just a quick side quest: Doesn’t the assert here risk <code>put</code> and <code>get</code> calls being optimized away? If not I think I might have misunderstood std.debug.assert’s doc comment and could use some education.</p>
+<p>Since assert is a regular function, the argument is evaluated (and is indeed in debug/safe builds), but since the expression is assumed to be true (otherwise unreachable) it seems like the whole expression is allowed to be removed</p>
+<p>Is there a difference whether the expression is fallible or not, or is deemed to have side effects?</p>
+</blockquote>
+<p>The nice thing about <a href="https://ziggit.dev">Ziggit</a> is that core team members frequently chimes in with their expertise, and that was the case here as well. So I figured I&rsquo;d try to summarize my understanding of everything based on those posts. Mostly for myself since I have streches where I have to code in lesser languages and might need a reminder on this - hopefully someone else finds it useful too.</p>
+<p>Back to the question.</p>
+<p>The short answer is: no, the <em>put</em> and <em>get</em> calls do most definitely <em>not</em> get optimized away. We&rsquo;ll see why in a bit.</p>
+<h2 id="stddebugassert-and-unreachable">std.debug.assert and unreachable<a hidden class="anchor" aria-hidden="true" href="#stddebugassert-and-unreachable">#</a></h2>
+<p>If you&rsquo;ve ever hit an assertion in Zig, you have also looked at the implementation of <code>std.debug.assert</code> since it appears in the panic trace:</p>
+<pre tabindex="0"><code>thread 33583038 panic: reached unreachable code
+
+lib/std/debug.zig:550:14: 0x10495bc93 in assert (sideeffects)
+
+if (!ok) unreachable; // assertion failure`
+</code></pre><p>That&rsquo;s all assert does: <code>if (!ok) unreachable;</code></p>
+<ul>
+<li>
+<p>If unreachable is hit in safe modes, then&hellip; well, you&rsquo;ve seen the panic trace. Very helpful.</p>
+</li>
+<li>
+<p>In optimizing modes, unreachable becomes a promise that control flow will not reach this point at all. Also very helpful: faster code!</p>
+</li>
+</ul>
+<p>Now, here&rsquo;s the doc comment on <code>assert</code> that probably helped people get confused, despite the comment being 100% verifiably correct:</p>
+<blockquote>
+<p>In ReleaseFast and ReleaseSmall modes, calls to this function are optimized
+away, and in fact the optimizer is able to use the assertion in its
+heuristics.</p>
+</blockquote>
+<p>On closer inspection, it turns out that this is just what the documentation of <code>unreachable</code> promised us. No more, no less.</p>
+<p>This is very different from C&rsquo;s assert which is a macro that nukes the entire contents through preprocessor directives. It&rsquo;s a similar story in many other languages. They have special constructs for asserts. Zig does not.</p>
+<p><code>std.debug.assert</code> is a plain old function, no special treatment is going on. The argument may or may not get optimized away. The idea that <code>if (!ok) unreachable;</code> somehow magically wires up the optimizer to always delete &ldquo;the whole thing&rdquo; is wrong.</p>
+<h2 id="does-that-mean-asserts-can-be-expensive-even-in-releasefast-mode">Does that mean asserts can be expensive even in ReleaseFast mode?<a hidden class="anchor" aria-hidden="true" href="#does-that-mean-asserts-can-be-expensive-even-in-releasefast-mode">#</a></h2>
+<p>Yes, because while the call to assert is gone, the LLVM optimizer that&rsquo;s supposed elide dead code isn&rsquo;t always able to do so. Bugs, limitations and side effects. The expensive check you passed as an argument <em>may</em> remain. Simple expressions like <code>arr.len &gt; 0</code> will almost certainly be
+nuked, but it&rsquo;s less clear for anything non-trivial. The Zig optimizer pipelines can&rsquo;t come soon enough.</p>
+<p>Anyway, I wanted to check all this during the Ziggit discussion and the very first example I came up with turned out to <em>not</em> be optimized away.</p>
+<p>Here&rsquo;s an improved version of my repro, thanks to <em>TibboddiT</em> on Ziggit:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-zig" data-lang="zig"><span style="display:flex;"><span><span style="color:#66d9ef">const</span> std <span style="color:#f92672">=</span> @import(<span style="color:#e6db74">&#34;std&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">fn</span> check(val<span style="color:#f92672">:</span> []<span style="color:#66d9ef">u8</span>) <span style="color:#66d9ef">bool</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> sum<span style="color:#f92672">:</span> <span style="color:#66d9ef">usize</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span> (<span style="color:#ae81ff">0</span>..val.len <span style="color:#f92672">*</span> <span style="color:#ae81ff">500_000_000</span>) <span style="color:#f92672">|</span>v<span style="color:#f92672">|</span> {
+</span></span><span style="display:flex;"><span>        sum <span style="color:#f92672">+=</span> val[v <span style="color:#f92672">%</span> val.len];
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> sum <span style="color:#f92672">==</span> <span style="color:#ae81ff">6874500000000</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">pub</span> <span style="color:#66d9ef">fn</span> main() <span style="color:#66d9ef">void</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Get a consistent runtime-only-known value
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">var</span> prng<span style="color:#f92672">:</span> std.Random.DefaultPrng <span style="color:#f92672">=</span> .init(<span style="color:#ae81ff">12</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">const</span> rand <span style="color:#f92672">=</span> prng.random();
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> buf<span style="color:#f92672">:</span> [<span style="color:#ae81ff">100</span>]<span style="color:#66d9ef">u8</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">undefined</span>;
+</span></span><span style="display:flex;"><span>    rand.bytes(<span style="color:#f92672">&amp;</span>buf);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    std.debug.assert(check(<span style="color:#f92672">&amp;</span>buf));
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Compile and run this under ReleaseFast on Zig 14.x and you&rsquo;ll see that the program is busy for a good while. The core team believes this is a missed optimization in LLVM.</p>
+<p>If profiling shows that an assertion is expensive, or you&rsquo;re just not confident it will be fully elided, you can do something like this:</p>
+<p><code>if (std.debug.runtime_safety) std.debug.assert(check(&amp;buf));</code></p>
+<p>&hellip;or check against build modes when that makes more sense.</p>
+<h3 id="side-effects">Side effects<a hidden class="anchor" aria-hidden="true" href="#side-effects">#</a></h3>
+<p>Now let&rsquo;s go back to the original question, which is about the opposite of trying to get rid of dead code. We want to keep code.</p>
+<p>We were told that <code>assert(try q.put(io, &amp;.{item}, 1) == 1);</code> is completely safe. There is no way that the optimizer will make
+the <code>put</code> call be elided, despite being inside an assert. The code is thus correct even under ReleaseFast.</p>
+<p>Zig has a clearly defined list of side effects that prevent the elision from happening. Andrew Kelley shared this:</p>
+<blockquote>
+<p>Examples of Not side effects:</p>
+<ul>
+<li>calling a function</li>
+<li>loading from memory</li>
+<li>storing to memory</li>
+<li>inline assembly</li>
+<li>atomics</li>
+<li>unreachable in unsafe optimization modes</li>
+<li>everything not in the following list</li>
+</ul>
+<p>Complete, exhaustive list of all side effects:</p>
+<ul>
+<li>loading through a volatile pointer</li>
+<li>storing through a volatile pointer</li>
+<li>inline assembly with volatile keyword</li>
+<li>atomics with volatile pointers</li>
+<li>calling an extern function</li>
+<li>@panic, @trap, @breakpoint</li>
+<li>unreachable in safe optimization modes (equivalent to @panic)</li>
+</ul>
+</blockquote>
+<p>A mutex qualifies as a side effect, the <code>put</code> implementation uses a mutex, thus <code>put</code> is not a candidate for elision.</p>
+<p>If the <code>put</code> implementation was simpler and just updated memory somewhere, then it looks to me, given the list above, that the call <em>may</em> be elided, but I have not verified that.</p>
+<p>So keep assertions in mind when refactoring. You don&rsquo;t want removal of side effects to turn into correctness issues.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+  </footer>
+</article>
+    </main>
+     </body>
+
+</html>

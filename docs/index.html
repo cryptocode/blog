@@ -108,6 +108,20 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">Zig asserts are not C asserts
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Part of learning a programming language is to check your assumptions. And to not be afraid of asking basic questions.
+I did just that in a Ziggit post that was completely unrelated to assertions, which linked to some code that gave me pause:
+pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q....</p>
+  </div>
+  <footer class="entry-footer"><span title='2025-07-22 20:32:37 +0200 +0200'>July 22, 2025</span></footer>
+  <a class="entry-link" aria-label="post link to Zig asserts are not C asserts" href="https://cryptocode.github.io/blog/docs/assert/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">Embedding machine code in Zig instead of using inline assembly
     </h2>
   </header>
