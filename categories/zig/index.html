@@ -111,8 +111,9 @@ Linux and macOS Rosetta notes The code is tested on macOS, but also works with m
     </h2>
   </header>
   <div class="entry-content">
-    <p> Cache lines A little Zig surprise The code The numbers Hyperthreading adds a twist Cache topology How come making a struct in Zig less densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.
-...</p>
+    <p>How come making a struct in Zig less densely packed can give a huge performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.
+While packing data closely together can be beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.
+False sharing occurs when the data layout is at odds with the memory access pattern, namely threads updating thread-specific data that happens to fall on the same cache line....</p>
   </div>
   <footer class="entry-footer"><span title='2023-07-09 10:00:00 +0200 +0200'>July 9, 2023</span></footer>
   <a class="entry-link" aria-label="post link to Cache Me If You Can" href="https://cryptocode.github.io/blog/docs/falsesharing/"></a>

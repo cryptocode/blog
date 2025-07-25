@@ -18,19 +18,9 @@
       <link>https://cryptocode.github.io/blog/docs/falsesharing/</link>
       <pubDate>Sun, 09 Jul 2023 10:00:00 +0200</pubDate>
       <guid>https://cryptocode.github.io/blog/docs/falsesharing/</guid>
-      <description>&lt;div style=&#34;font-size: small;&#34;&gt;
-    &lt;nav id=&#34;TableOfContents&#34;&gt;
-  &lt;ul&gt;
-    &lt;li&gt;&lt;a href=&#34;#cache-lines&#34;&gt;Cache lines&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&#34;#a-little-zig-surprise&#34;&gt;A little Zig surprise&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&#34;#the-code&#34;&gt;The code&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&#34;#the-numbers&#34;&gt;The numbers&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&#34;#hyperthreading-adds-a-twist&#34;&gt;Hyperthreading adds a twist&lt;/a&gt;&lt;/li&gt;
-    &lt;li&gt;&lt;a href=&#34;#cache-topology&#34;&gt;Cache topology&lt;/a&gt;&lt;/li&gt;
-  &lt;/ul&gt;
-&lt;/nav&gt;
-&lt;/div&gt;
-&lt;p&gt;How come making a struct in Zig &lt;em&gt;less&lt;/em&gt; densely packed can give a 56% performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.&lt;/p&gt;</description>
+      <description>How come making a struct in Zig less densely packed can give a huge performance increase, with far less variability? This post takes a look at false sharing and how it can be caused by packed data layouts and unintended field reorderings.
+While packing data closely together can be beneficial due to cache locality, false sharing must be taken into account when designing optimal data layouts for multithreaded programs.
+False sharing occurs when the data layout is at odds with the memory access pattern, namely threads updating thread-specific data that happens to fall on the same cache line.</description>
     </item>
   </channel>
 </rss>
