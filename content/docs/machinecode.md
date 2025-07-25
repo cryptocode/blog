@@ -1,6 +1,6 @@
 ---
 toc: true
-title: "Embedding machine code in Zig instead of using inline assembly"
+title: "Embedding machine code in Zig"
 date: 2023-07-29T12:01:51+02:00
 categories: ["asm", "zig"]
 published: true
@@ -8,22 +8,21 @@ published: true
 
 {{< table_of_contents >}}
 
-Zig supports inline assembly, which is useful when:
+Using assembly code with Zig is usually done via inline assembly, or by linking to object files produced by assemblers.
 
-* Writing an operating system, which requires direct access to special CPU registers and controllers
-* Implementing syscalls in standard libraries
-* Accessing microcontroller features on embedded systems
-* Handwriting a performance-critical hot-path function where the optimizer doesn't do the right thing
+This post explores a third way: write the assembly in a separate source file, run an assembler, and then embed the resulting machine code using `@embedFile`
 
-Inline assembly, however, can quickly get unwieldy, and getting the input/output constraints right can be tricky.
+## Linux and macOS Rosetta notes
+The code is tested on macOS, but also works with minor modifications on Linux (primarily the syscall number)
 
-In this post, we'll explore an alternative: write the assembly in separate files, run your favorite assembler, and then embed the resulting machine code using `@embedFile`. Running the assembler can obviously be automated from the build script.
+Since the code here is x86_64, you can do the following on aarch64 macs to use Rosetta translation:
 
-The code is tested on **macOS**, but should work with minor modifications on Linux (primarily the syscall number)
+```bash
+arch -x86_64 /bin/zsh --login
 
-## Object files vs. raw machine code
-
-Why not simply generate object files from the assembler and link it with the Zig code? That's likely the better option in most cases. However, in free-standing and embedded environments, you might not want the overhead and relocation complexity. Embedding machine code has very niche use cases, but, hey, it's fun and still useful to know, and it's an excuse to look into efficient use of ABI calling conventions.
+zig build-exe -target x86_64-macos asm.zig
+./asm
+```
 
 ## Assembling
 
@@ -50,15 +49,13 @@ nasm -f bin -o asm-add.bin asm-add.s
 
 Thanks to `-f bin`, this will produce a file called `asm-add.bin` containing the raw machine code, with no metadata like headers and sections. Just raw machine code for each instruction in the assembly file.
 
-You can check that the .bin file is correct by disassembling it:
+Let's disassemble it to verify that claim:
 
 ```bash
 ndisasm -b 64 asm-add.bin
 ```
 
-This will output the same instructions as in the assembly file.
-
-We might as well dig a little deeper and look at the actual machine code:
+This will output the same instructions as in the assembly file:
 
 ```plain
 hexdump -C asm-add.bin 
@@ -85,7 +82,7 @@ c3: ret
 
 ## Calling from Zig
 
-Next, we'll call the _add_ function from Zig.
+Next, let's call the _add_ function from Zig.
 
 The process is roughly as follows:
 
@@ -101,20 +98,20 @@ The process is roughly as follows:
 const std = @import("std");
 
 pub fn main() !void {
-    const code = try std.heap.page_allocator.alignedAlloc(u8, std.mem.page_size, std.mem.page_size);
+    const code = try std.heap.page_allocator.alignedAlloc(u8, @intCast(std.heap.pageSize()), std.heap.pageSize());
     defer {
         // In order to deallocate, we have to make the page writable again
-        std.os.mprotect(code, std.os.PROT.WRITE) catch unreachable;
+        _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.WRITE);
         std.heap.page_allocator.free(code);
     }
 
     // Wrap the code page in a buffer stream and write the machine code to it
     var buf = std.io.fixedBufferStream(code);
     _ = try buf.write(@embedFile("asm-add.bin"));
-    try std.os.mprotect(code, std.os.PROT.READ | std.os.PROT.EXEC);
+    _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.READ | std.c.PROT.EXEC);
 
     // Make a Zig function pointer for adding two u64s and returning the result
-    const add: *const fn(a: u64, b: u64) callconv(.C) u64 = @ptrCast(code);
+    const add: *const fn (a: u64, b: u64) callconv(.C) u64 = @ptrCast(code);
 
     // Call the machine code through the function pointer
     // This will put the arguments into rdi and rsi, and return the result in rax
@@ -152,37 +149,38 @@ Here's an expanded version of the example, with two more functions: an AVX based
 `asm.zig`
 
 ```zig
+const std = @import("std");
+
 pub fn main() !void {
-    const code = try std.heap.page_allocator.alignedAlloc(u8, std.mem.page_size, std.mem.page_size);
+    const code = try std.heap.page_allocator.alignedAlloc(u8, @intCast(std.heap.pageSize()), std.heap.pageSize());
     defer {
         // In order to deallocate, we have to make the page writable again
-        std.os.mprotect(code, std.os.PROT.WRITE) catch unreachable;
+        _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.WRITE);
         std.heap.page_allocator.free(code);
     }
 
     // Wrap the code page in a buffer stream and write the machine code to it
-    var buf = std.io.fixedBufferStream(code);    
+    var buf = std.io.fixedBufferStream(code);
     _ = try buf.write(@embedFile("asm-add.bin"));
-    try std.os.mprotect(code, std.os.PROT.READ | std.os.PROT.EXEC);
+    _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.READ | std.c.PROT.EXEC);
 
     // Make a Zig function pointer for adding two u64s and returning the result
-    const add: *const fn(a: u64, b: u64) callconv(.C) u64 = @ptrCast(code);
+    const add: *const fn (a: u64, b: u64) callconv(.C) u64 = @ptrCast(code);
 
     // Call the machine code through the function pointer
     const res = add(1, 2);
     std.debug.print("Res = {d}\n", .{res});
 
-    // Fast memcpy. To make the example short, we simply overwrite the code page with the memcpy code.
-    // In a real program, we would append the memcpy code to the code page, at a suitably aligned offset.
-    std.os.mprotect(code, std.os.PROT.WRITE) catch unreachable;
+    // Fast memcpy
+    _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.WRITE);
     try buf.seekTo(0);
     _ = try buf.write(@embedFile("asm-opt-memcpy.bin"));
-    try std.os.mprotect(code, std.os.PROT.READ | std.os.PROT.EXEC);
+    _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.READ | std.c.PROT.EXEC);
 
     // This memcpy requires the destination and source to be aligned to 32 bytes, and len to be a multiple of 64 bytes
-    const fast_memcpy: *const fn(dst: u64, src: u64, len: u64) callconv(.C) ?[*]const u8 = @ptrCast(code);
-    var dst = try std.heap.page_allocator.alignedAlloc(u8, 32, 64);
-    var src = try std.heap.page_allocator.alignedAlloc(u8, 32, 64);    
+    const fast_memcpy: *const fn (dst: u64, src: u64, len: u64) callconv(.C) ?[*]const u8 = @ptrCast(code);
+    const dst = try std.heap.page_allocator.alignedAlloc(u8, 32, 64);
+    const src = try std.heap.page_allocator.alignedAlloc(u8, 32, 64);
     const test_bytes = "0123456789012345678901234567890123456789012345678901234567891234";
     @memcpy(src, test_bytes);
     _ = fast_memcpy(@intFromPtr(dst.ptr), @intFromPtr(src.ptr), 64);
@@ -191,14 +189,15 @@ pub fn main() !void {
     } else {
         std.debug.print("fast_memcpy failed!\n", .{});
     }
+    try std.testing.expectEqualStrings(test_bytes, dst);
 
-    // Next machine code file writes a message to stdout. We once again overwrite the code page for simplicity.
-    std.os.mprotect(code, std.os.PROT.WRITE) catch unreachable;
+    // Next machine code file writes a message to stdout
+    _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.WRITE);
     try buf.seekTo(0);
     _ = try buf.write(@embedFile("asm-syscall.bin"));
-    try std.os.mprotect(code, std.os.PROT.READ | std.os.PROT.EXEC);
+    _ = std.c.mprotect(@ptrCast(code), std.heap.pageSize(), std.c.PROT.READ | std.c.PROT.EXEC);
 
-    const hello_world: *const fn(msg: ?[*:0]const u8, len: u64) callconv(.C) void = @ptrCast(code);
+    const hello_world: *const fn (msg: ?[*:0]const u8, len: u64) callconv(.C) void = @ptrCast(code);
     hello_world("Hello, world!!!\n", 16);
 }
 ```
@@ -292,3 +291,5 @@ Res = 3
 fast_memcpy works!
 Hello, world!!!
  ```
+
+*Edited July 2025. Code examples now compile with Zig 0.14.1. Added notes about using Rosetta on macOS.*
