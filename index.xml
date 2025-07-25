@@ -27,8 +27,8 @@ Just a quick side quest: Doesn’t the assert here risk put and get calls being 
       <link>https://cryptocode.github.io/blog/docs/machinecode/</link>
       <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
       <guid>https://cryptocode.github.io/blog/docs/machinecode/</guid>
-      <description>Object files vs. raw machine code Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
-Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in standard libraries Accessing microcontroller features on embedded systems Handwriting a performance-critical hot-path function where the optimizer doesn&amp;rsquo;t do the right thing Inline assembly, however, can quickly get unwieldy, and getting the input/output constraints right can be tricky.</description>
+      <description>Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
+Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in a standard library Accessing microcontroller features on an embedded system Handwriting a performance-critical hot-path function where the optimizer isn&amp;rsquo;t up to the task This post explores an alternative: write the assembly in separate files, run your favorite assembler, and then embed the resulting machine code using @embedFile.</description>
     </item>
     <item>
       <title>Cache Me If You Can</title>
