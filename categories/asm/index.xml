@@ -14,12 +14,13 @@
     <lastBuildDate>Sat, 29 Jul 2023 12:01:51 +0200</lastBuildDate>
     <atom:link href="https://cryptocode.github.io/blog/categories/asm/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Embedding machine code in Zig instead of using inline assembly</title>
+      <title>Embedding machine code in Zig</title>
       <link>https://cryptocode.github.io/blog/docs/machinecode/</link>
       <pubDate>Sat, 29 Jul 2023 12:01:51 +0200</pubDate>
       <guid>https://cryptocode.github.io/blog/docs/machinecode/</guid>
-      <description>Linux and macOS Rosetta notes Assembling Calling from Zig A larger example with fast memcpy and syscalls Zig supports inline assembly, which is useful when:
-Writing an operating system, which requires direct access to special CPU registers and controllers Implementing syscalls in a standard library Accessing microcontroller features on an embedded system Handwriting a performance-critical hot-path function where the optimizer isn&amp;rsquo;t up to the task This post explores an alternative: write the assembly in separate files, run your favorite assembler, and then embed the resulting machine code using @embedFile.</description>
+      <description>Linux and macOS Rosetta notes Assembling Calling from Zig A larger example with fast memcpy and syscalls Using assembly code with Zig is usually done via inline assembly, or by linking to object files produced by assemblers.
+This post explores a third way: write the assembly in a separate source file, run an assembler, and then embed the resulting machine code using @embedFile
+Linux and macOS Rosetta notes The code is tested on macOS, but also works with minor modifications on Linux (primarily the syscall number)</description>
     </item>
   </channel>
 </rss>
