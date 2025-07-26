@@ -39,3 +39,6 @@ images = ["images/mondrian.png"]
     endLevel = 3
     ordered = false
     startLevel = 2
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
