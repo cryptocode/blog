@@ -16,16 +16,16 @@ pub fn getOne(q: *@This(), io: Io) Cancelable!Elem {
     return buf[0];
 }
 ```
-...which lead me to ask the following:
-> Just a quick side quest: Doesn’t the assert here risk `put` and `get` calls being optimized away? If not I think I might have misunderstood std.debug.assert’s doc comment and could use some education.
+...which led me to ask the following:
+> Just a quick side quest: Doesn’t the assert here risk *put* and *get* calls being optimized away? If not I think I might have misunderstood std.debug.assert’s doc comment and could use some education.
 >
 > Since assert is a regular function, the argument is evaluated (and is indeed in debug/safe builds), but since the expression is assumed to be true (otherwise unreachable) it seems like the whole expression is allowed to be removed
 >
 > Is there a difference whether the expression is fallible or not, or is deemed to have side effects?
 
-The nice thing about [Ziggit](https://ziggit.dev) is that core team members frequently chimes in with their expertise, and that was the case here as well. So I figured I'd try to summarize my understanding of Zig assertions based on those posts.
+Fortunately, core Zig team members frequently chimes in with their expertise on [Ziggit](https://ziggit.dev) and that was the case here as well.
 
-The short answer to my question is: no, the *put* and *get* calls will definitely *not* get optimized away. We'll see why in a bit.
+The short answer to my question is: no, the *put* and *get* calls will *not* get optimized away. We'll see why in a bit.
 
 ## std.debug.assert and unreachable
 
@@ -53,16 +53,15 @@ Here's the doc comment on `assert` that helped myself and some others get confus
 
 On closer inspection, this is just what the language reference entry on `unreachable` promise us. No more, no less.
 
-This is very different from C's assert which nukes the whole thing through macros and preprocessor directives. It's a similar story in many other languages. They have special constructs for asserts. Zig does not; `std.debug.assert` is a plain old function for which no special treatment is given.
+This is very different from C's `assert` which can nuke the whole thing through macros and preprocessor directives, depending on whether `NDEBUG` is set by the build system. It's a similar story in many other languages - they have special constructs for assertions.
 
-The idea that `if (!ok) unreachable;` somehow magically wires up the optimizer to always delete "the whole thing" is wrong.
+In Zig, `std.debug.assert` is a plain old function for which no special treatment is given. The idea that `if (!ok) unreachable;` somehow wires up the optimizer to always delete "the whole thing" in relase builds is wrong.
 
-## Does this mean asserts can be expensive even in ReleaseFast mode?
+### Does this mean asserts can be expensive even in ReleaseFast mode?
 
-Yes, because while the call to assert is gone, the LLVM optimizer that's supposed to remove dead code isn't always able to do so. Bugs, limitations and side effects. An expensive check passed as an argument to assert *may* remain. Simple expressions like `data.len > 0` will almost certainly be
-optimized out, but it's less clear for anything non-trivial.
+Yes, because while the call to assert is gone, the LLVM optimizer that's supposed to remove dead code isn't always able to do so. Simple expressions like `data.len > 0` will almost certainly be optimized out, but it's less clear for anything non-trivial.
 
-I shared an example in the Ziggit thread where dead code removal does *not* happen. Here's an improved version by *TibboddiT*:
+I shared an example in the Ziggit thread where dead code removal does not occur. Here's an improved version by *TibboddiT*:
 
 ```zig
 const std = @import("std");
@@ -87,7 +86,8 @@ pub fn main() void {
 }
 ```
 
-Compile and run this under ReleaseFast on Zig 0.14.x and you'll see that the program is busy for a good while. The core team believe this is a missed optimization in LLVM.
+Compile and run this under ReleaseFast on Zig 0.14.x and you'll see that the program is busy for a good while. 
+The core team believes this to be a missed optimization in LLVM.
 
 If profiling shows that an assertion is expensive, or you're just not confident it will be fully elided, you can do something like this:
 
@@ -99,28 +99,34 @@ If profiling shows that an assertion is expensive, or you're just not confident 
 
 Now back to the original question, which is about the opposite of trying to get rid of dead code. We want to *keep* code.
 
-There are many reasons why code will never be removed by a correctly implemented optimizer. One of them is the presence of side effects. Another example is when writes to memory must be observable when that memory is later read. Basically, the optimizer's rule is that code removal must not lead to correctness bugs.
+There are many reasons why code will never be removed by a correctly implemented optimizer. One of them is the presence of side effects  <a href="#fn1">[1]</a>. Another reason is that writes to memory must be observable when that memory is later read.
 
-The *put* call in `assert(try q.put(io, &.{item}, 1) == 1);` have side effects *and* depends on memory coherence as there's a *get* call elsewhere. We're all good.
+Basically, the optimizer's rule is that code removal must not lead to correctness bugs.
 
-By the way, Andrew Kelley shared Zig's concrete list of side effects:
-
-> * loading through a volatile pointer
-> * storing through a volatile pointer
-> * inline assembly with volatile keyword
-> * atomics with volatile pointers
-> * calling an extern function
-> * @panic, @trap, @breakpoint
-> * unreachable in safe optimization modes (equivalent to @panic)
-
-There isn't really anything to worry about here beyond perhaps LLVM optimization bugs.
+The *put* call in `assert(try q.put(io, &.{item}, 1) == 1);` has side effects *and* depends on memory coherence as there's a *get* call elsewhere. We're all good.
 
 # Conclusion:
 
-* `std.debug.assert(expr)` is nothing more than `if (!expr) unreachable` where *unreachable* yields a helpful trace in safe build modes, and provides the optimizer with useful information in unsafe builds
-* The optimizer may or may not be able to optimize away `expr`
+* The `assert(expr)` call is nothing more than `if (!expr) unreachable` where unreachable:
+  * yields a helpful trace in safe builds, and
+  * provides the optimizer with useful information in unsafe builds
 * The optimizer will never optimize away `expr` if doing so would lead to correctness issues
+* The optimizer is not always able to optimize away `expr` even when it's effectively dead code
 
 I'll round this off with some wise words from ifreund [on the issue](https://github.com/ziglang/zig/issues/10942) if Zig should match C's assert behavior:
 
-> I think trying to match C's assert is exactly what we should not do. I've seen many bugs caused by putting expressions with side effects inside the assert macro.
+> *I think trying to match C's assert is exactly what we should not do. I've seen many bugs caused by putting expressions with side effects inside the assert macro. Macros suck.*
+
+---
+
+<small id="fn1">
+[1] In the Ziggit thread, Andrew Kelley shared the concrete list of side effects:
+
+* loading through a volatile pointer
+* storing through a volatile pointer
+* inline assembly with volatile keyword
+* atomics with volatile pointers
+* calling an extern function
+* @panic, @trap, @breakpoint
+* unreachable in safe optimization modes (equivalent to @panic)
+</small>
