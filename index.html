@@ -158,7 +158,7 @@
   </header>
   <div class="entry-content">
     <p>I recently came across a piece of code in a Ziggit.dev post that gave me pause:
-pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q.get(io, &amp;buf, 1) == 1); return buf[0]; } …which lead me to ask the following:
+pub fn putOne(q: *@This(), io: Io, item: Elem) Cancelable!void { assert(try q.put(io, &amp;.{item}, 1) == 1); } pub fn getOne(q: *@This(), io: Io) Cancelable!Elem { var buf: [1]Elem = undefined; assert(try q.get(io, &amp;buf, 1) == 1); return buf[0]; } …which led me to ask the following:
 Just a quick side quest: Doesn’t the assert here risk put and get calls being optimized away?...</p>
   </div>
   <footer class="entry-footer"><span title='2025-07-22 20:32:37 +0200 +0200'>July 22, 2025</span></footer>
